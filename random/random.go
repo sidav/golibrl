@@ -7,7 +7,8 @@ import (
 const (
 	a = 513
 	c = 313
-	m = 262147
+	// m = 262147
+	m = 1000000005721 // prime 
 )
 
 var (
@@ -57,7 +58,7 @@ func RandInRange(from, to int) int { //should be inclusive
 	if from == to {
 		return from
 	}
-	return Random(to-from+1) + from 
+	return Random(to-from+1) + from
 }
 
 func RandomPercent() int {
