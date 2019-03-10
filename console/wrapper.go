@@ -38,7 +38,7 @@ var (
 func Init_console(title string, preferableRenderer int) {
 	selectedRenderer = preferableRenderer
 	if selectedRenderer == SDLRenderer {
-		sdl_console.Init_console()
+		sdl_console.Init_console(title)
 		return
 	}
 	if selectedRenderer == TCellRenderer {
