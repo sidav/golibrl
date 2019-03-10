@@ -32,7 +32,6 @@ var (
 	winTitle                            = "Go-SDL2 Texture"
 	chrW, chrH                    int32 = 10, 16
 	termW, termH                  int32 = 80, 25
-	CONSOLE_WIDTH, CONSOLE_HEIGHT int   = 80, 25
 	winWidth, winHeight                 = termW*chrW, termH*chrH
 	FontPngFileName                     = "assets/font_10x16.png"
 	window                        *sdl.Window
@@ -136,13 +135,13 @@ func Close_console() { //should be deferred!
 }
 
 func PurgeConsole() { // compatibility stub
-	return
+	renderer.Clear()
 }
 
 func Clear_console() {
 	SetFgColorRGB(255, 255, 255)
 	SetBgColorRGB(0, 0, 0)
-	renderer.Clear()
+	renderer.FillRect(&sdl.Rect{0, 0, winWidth, winHeight})
 }
 
 func Flush_console() {
@@ -264,7 +263,6 @@ func windowResizeWork(wEvent *sdl.WindowEvent) {
 	if evnt == sdl.WINDOWEVENT_RESIZED {
 		winWidth, winHeight = wEvent.Data1, wEvent.Data2
 		termW, termH = winWidth/chrW, winHeight/chrH
-		CONSOLE_WIDTH, CONSOLE_HEIGHT = int(termW), int(termH)
 		wasResized = true
 	}
 }
