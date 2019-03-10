@@ -1,6 +1,9 @@
 package math
 
-import "math"
+import (
+	"math"
+	rnd "github.com/sidav/goLibRL/random"
+)
 
 type Vector struct {
 	X, Y float64
@@ -56,7 +59,7 @@ func (v *Vector) TransformIntoUnitVector() {
 
 func CreateRandomVectorBetweenTwo(a, b *Vector) *Vector {
 	const precision = 100.0
-	x := float64(RandInRange(int(a.X*precision), int(b.X*precision)))/precision // strict typing sucks
-	y := float64(RandInRange(int(a.Y*precision), int(b.Y*precision)))/precision
+	x := float64(rnd.RandInRange(int(a.X*precision), int(b.X*precision)))/precision // strict typing sucks
+	y := float64(rnd.RandInRange(int(a.Y*precision), int(b.Y*precision)))/precision
 	return &Vector{x, y}
 }

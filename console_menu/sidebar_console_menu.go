@@ -1,7 +1,7 @@
 package console_menu
 
 import (
-	cw "TCellConsoleWrapper"
+	cw "github.com/sidav/goLibRL/console"
 	"strconv"
 	"strings"
 )
