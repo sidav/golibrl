@@ -145,11 +145,11 @@ func SetFgColor(fg int) {
 
 func SetBgColor(bg int) {
 	if selectedRenderer == SDLRenderer {
-		sdl_console.SetFgColor(bg)
+		sdl_console.SetBgColor(bg)
 		return
 	}
 	if selectedRenderer == TCellRenderer {
-		tcell_console.SetFgColor(bg)
+		tcell_console.SetBgColor(bg)
 	}
 }
 
