@@ -73,6 +73,7 @@ func Clear_console() {
 }
 
 func Flush_console() {
+	flushesCounter += 1
 	if selectedRenderer == SDLRenderer {
 		sdl_console.Flush_console()
 		return
@@ -244,7 +245,9 @@ func GetMouseMovementVector() (int, int) {
 
 
 func GetNumberOfRecentFlushes() int { // may be useful for searching rendering overkills and something
-	return flushesCounter
+	t := flushesCounter
+	flushesCounter = 0
+	return t
 }
 
 func PrintCharactersTable() {

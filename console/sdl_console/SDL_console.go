@@ -325,12 +325,6 @@ func startAsyncEventListener() {
 	}
 }
 
-func GetNumberOfRecentFlushes() int { // may be useful for searching rendering overkills and something
-	t := flushesCounter
-	flushesCounter = 0
-	return t
-}
-
 func PrintCharactersTable() {
 	for x := 0; x < int(termW); x++ {
 		for y := 0; y < int(termH); y++ {
