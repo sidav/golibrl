@@ -98,7 +98,7 @@ func Init_console(title string) {
 		return
 	}
 
-	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)//sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create renderer: %s\n", err)
 		return
@@ -125,6 +125,7 @@ func Init_console(title string) {
 	renderer.FillRect(&sdl.Rect{0, 0, int32(winWidth), int32(winHeight)})
 	renderer.Copy(texture, &src, &dst)
 	renderer.Present()
+	sdl.Delay(0)
 }
 
 func Close_console() { //should be deferred!
@@ -146,6 +147,7 @@ func Clear_console() {
 
 func Flush_console() {
 	renderer.Present()
+	sdl.Delay(0)
 }
 
 func GetConsoleSize() (int, int) {
@@ -319,6 +321,7 @@ func startAsyncEventListener() {
 		select {
 		case evCh <- ev:
 		default:
+			sdl.Delay(0)
 		}
 	}
 }
