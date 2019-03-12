@@ -55,7 +55,19 @@ func ShowSidebarSingleChoiceMenu(title string, titleColor, mx, my, mw int, mh in
 		cw.SetBgColor(cw.BLACK)
 		cw.Flush_console()
 
-		key := cw.ReadKey()
+		key := cw.ReadKeyAsync()
+
+		_, mousey := cw.GetMouseCoords()
+		if isMouseInMenuBounds(mx, my, mw, mh) {
+			cursorIndex = mousey - my - 1
+			if !cw.IsMouseHeld() && cw.GetMouseButton() == "LEFT" {
+				return cursorIndex
+			}
+			if !cw.IsMouseHeld() && cw.GetMouseButton() == "RIGHT" {
+				return -1
+			}
+		}
+
 		switch key {
 		case "DOWN", "2":
 			cursorIndex = (cursorIndex + 1) % len(items)

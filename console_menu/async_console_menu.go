@@ -11,8 +11,8 @@ func DrawSidebarMouseOnlyAsyncMenu(title string, titleColor, mx, my, mw int, ite
 	mh := len(items)+1 // +1 is for the title
 
 	cursorIndex := -1
-	mousex, mousey := cw.GetMouseCoords()
-	if mousex >= mx && mousex < mx+mw && mousey > my && mousey < my + mh {
+	_, mousey := cw.GetMouseCoords()
+	if isMouseInMenuBounds(mx, my, mw, mh) {
 		cursorIndex = mousey - my - 1
 	}
 
