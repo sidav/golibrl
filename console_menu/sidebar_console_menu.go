@@ -25,12 +25,12 @@ func DrawSidebarInfoMenu(title string, titleColor, mx, my, mw int, items []strin
 	// no flush?
 }
 
-func ShowSidebarSingleChoiceMenu(title string, titleColor, mx, my, mw int, mh int, items []string, descriptions []string) int { // returns an index of selected element or -1 if none selected.
+func ShowSidebarSingleChoiceMenu(title string, titleColor, mx, my, mw int, max_h int, items []string, descriptions []string) int { // returns an index of selected element or -1 if none selected.
 	drawSidebarMenuTitle(title, titleColor, mx, my, mw)
 	cursorIndex := 0
 	for {
 
-		for y := 1; y < mh; y++ {
+		for y := 1; y < max_h; y++ {
 			cw.PutString(strings.Repeat(" ", mw), mx, y+my) // clear menu screen space
 		}
 		for i := 0; i < len(items); i++ {
@@ -49,7 +49,7 @@ func ShowSidebarSingleChoiceMenu(title string, titleColor, mx, my, mw int, mh in
 			cw.SetFgColor(cw.BEIGE)
 
 			if len(descriptions) > 0 {
-				DrawWrappedTextInRect(descriptions[cursorIndex], 0, my+mh, mx+mw, 5)
+				DrawWrappedTextInRect(descriptions[cursorIndex], 0, my+max_h, mx+mw, 5)
 			}
 		}
 		cw.SetBgColor(cw.BLACK)
@@ -58,7 +58,7 @@ func ShowSidebarSingleChoiceMenu(title string, titleColor, mx, my, mw int, mh in
 		key := cw.ReadKeyAsync()
 
 		_, mousey := cw.GetMouseCoords()
-		if isMouseInMenuBounds(mx, my, mw, mh) {
+		if isMouseInMenuBounds(mx, my, mw, len(items)+1) {
 			cursorIndex = mousey - my - 1
 			if !cw.IsMouseHeld() && cw.GetMouseButton() == "LEFT" {
 				return cursorIndex
