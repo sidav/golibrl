@@ -244,6 +244,9 @@ func ReadKeyAsync() string { // also reads mouse events... TODO: think of if sep
 
 			// for compatibility...
 			keyString = strings.Replace(keyString, "Keypad ", "", -1)
+			if keyString == "Return" {
+				return "ENTER" // TODO: reconsider?
+			}
 
 			if (ev.Keysym.Mod&sdl.KMOD_SHIFT) != 1 && len(keyString) == 1 {
 				return strings.ToLower(keyString)

@@ -204,7 +204,24 @@ func ShowSidebarCreateQueueMenu(title string, titleColor, mx, my, mw int, mh int
 
 		cw.Flush_console()
 
-		key := cw.ReadKey()
+		key := cw.ReadKeyAsync()
+
+		_, mousey := cw.GetMouseCoords()
+		if isMouseInMenuBounds(mx, my, mw, len(items)+1) {
+			cursorIndex = mousey - my - 1
+			if !cw.IsMouseHeld() && cw.GetMouseButton() == "RIGHT" {
+				for i := len(values) - 1; i >= 0; i-- {
+					if values[i] == cursorIndex {
+						values = append(values[:i], values[i+1:]...) // removes i-th element
+						break
+					}
+				}
+			}
+			if !cw.IsMouseHeld() && cw.GetMouseButton() == "LEFT" {
+				values = append(values, cursorIndex)
+			}
+		}
+
 		switch key {
 		case "DOWN", "2":
 			cursorIndex = (cursorIndex + 1) % len(items)
