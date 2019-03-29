@@ -129,7 +129,7 @@ func analyzeNeighbors(curCell *Cell, openlist *[]*Cell, closedlist *[]*Cell, cos
 	cx, cy := curCell.X, curCell.Y
 	for i := -1; i <= 1; i++ {
 		for j := -1; j <= 1; j++ {
-			if i == 0 && j == 0 {
+			if (i == 0 && j == 0) || (!diagAllowed && i != 0 && j != 0) {
 				continue
 			}
 			x, y := cx+i, cy+j
@@ -138,7 +138,6 @@ func analyzeNeighbors(curCell *Cell, openlist *[]*Cell, closedlist *[]*Cell, cos
 				if (*costMap)[x][y] == -1 || getCellWithCoordsFromList(closedlist, x, y) != nil { // Cell is impassable or is in closed list
 					continue // ignore it
 				}
-				// TODO: add a flag for skipping diagonally lying cells
 				// TODO: add actual "cost to move there" from costMap
 				if (i * j) != 0 { // the Cell under consideration is lying diagonally
 					cost = DIAGONAL_COST
