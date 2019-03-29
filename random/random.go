@@ -66,10 +66,10 @@ func RandomPercent() int {
 }
 
 func RandomCoordsInRangeFrom(x, y, r int) (int, int) {
-	rx, ry := x+2*r, y+2*r 
+	rx, ry := x+3*r, y+3*r
 	for (rx-x)*(rx-x)+(ry-y)*(ry-y) > r*r {
-		rx = RandInRange(x-r/2-1, x+r/2+1)
-		ry = RandInRange(y-r/2-1, y+r/2+1)
+		rx = RandInRange(x-r-1, x+r+1)
+		ry = RandInRange(y-r-1, y+r+1)
 	}
 	return rx, ry
 }
