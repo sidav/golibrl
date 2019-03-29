@@ -64,3 +64,13 @@ func RandInRange(from, to int) int { //should be inclusive
 func RandomPercent() int {
 	return Random(100)
 }
+
+func RandomCoordsInRangeFrom(x, y, r int) (int, int) {
+	rx, ry := x+2*r, y+2*r 
+	for (rx-x)*(rx-x)+(ry-y)*(ry-y) > r*r {
+		rx = RandInRange(x-r/2-1, x+r/2+1)
+		ry = RandInRange(y-r/2-1, y+r/2+1)
+	}
+	return rx, ry
+}
+
