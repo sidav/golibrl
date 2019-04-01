@@ -83,7 +83,7 @@ func (c *Cell) setChildsForPath() {
 	return
 }
 
-func FindPath(costMap *[][]int, fromx, fromy, tox, toy int, diagonalMoveAllowed, forceGetPath bool) *Cell {
+func FindPath(costMap *[][]int, fromx, fromy, tox, toy int, diagonalMoveAllowed, forceGetPath, forceIncludeFinish bool) *Cell {
 	openList := make([]*Cell, 0)
 	closedList := make([]*Cell, 0)
 	var currentCell *Cell
@@ -102,7 +102,7 @@ func FindPath(costMap *[][]int, fromx, fromy, tox, toy int, diagonalMoveAllowed,
 		closedList = append(closedList, currentCell)
 		openList = append(openList[:currentCellIndex], openList[currentCellIndex+1:]...) // this friggin' magic removes currentCellIndex'th element from openList
 		//sub-step 2c:
-		analyzeNeighbors(currentCell, &openList, &closedList, costMap, tox, toy, diagonalMoveAllowed)
+		analyzeNeighbors(currentCell, &openList, &closedList, costMap, tox, toy, diagonalMoveAllowed, forceIncludeFinish)
 		//sub-step 2d:
 		total_steps += 1
 		targetInOpenList := getCellWithCoordsFromList(&openList, tox, toy)
@@ -124,7 +124,7 @@ func FindPath(costMap *[][]int, fromx, fromy, tox, toy int, diagonalMoveAllowed,
 	return nil
 }
 
-func analyzeNeighbors(curCell *Cell, openlist *[]*Cell, closedlist *[]*Cell, costMap *[][]int, targetX, targetY int, diagAllowed bool) {
+func analyzeNeighbors(curCell *Cell, openlist *[]*Cell, closedlist *[]*Cell, costMap *[][]int, targetX, targetY int, diagAllowed, forceIncludeFinish bool) {
 	cost := 0
 	cx, cy := curCell.X, curCell.Y
 	for i := -1; i <= 1; i++ {
@@ -136,7 +136,9 @@ func analyzeNeighbors(curCell *Cell, openlist *[]*Cell, closedlist *[]*Cell, cos
 			if areCoordsValidForCostMap(x, y, costMap) {
 				// if (x != targetX || y != targetY) &&
 				if (*costMap)[x][y] == -1 || getCellWithCoordsFromList(closedlist, x, y) != nil { // Cell is impassable or is in closed list
-					continue // ignore it
+					if !(forceIncludeFinish && x == targetX && y == targetY) { // if forceIncludeFinish is true, then we won't ignore finish cell whether it is passable or whatever.
+						continue // ignore it
+					}
 				}
 				// TODO: add actual "cost to move there" from costMap
 				if (i * j) != 0 { // the Cell under consideration is lying diagonally
