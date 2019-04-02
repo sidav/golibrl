@@ -1,7 +1,7 @@
 package console_menu
 
 import (
-	cw "github.com/sidav/goLibRL/console"
+	cw "github.com/sidav/golibrl/console"
 	"strconv"
 	"strings"
 )

@@ -2,7 +2,7 @@ package math
 
 import (
 	"math"
-	rnd "github.com/sidav/goLibRL/random"
+	rnd "github.com/sidav/golibrl/random"
 )
 
 type Vector struct {

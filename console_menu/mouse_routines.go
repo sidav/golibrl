@@ -1,6 +1,6 @@
 package console_menu
 
-import cw "github.com/sidav/goLibRL/console"
+import cw "github.com/sidav/golibrl/console"
 
 func isMouseInMenuBounds(mx, my, mw, mh int) bool {
 	mousex, mousey := cw.GetMouseCoords()

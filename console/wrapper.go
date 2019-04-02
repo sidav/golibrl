@@ -1,8 +1,8 @@
 package console
 
 import (
-	"github.com/sidav/goLibRL/console/sdl_console"
-	"github.com/sidav/goLibRL/console/tcell_console"
+	"github.com/sidav/golibrl/console/sdl_console"
+	"github.com/sidav/golibrl/console/tcell_console"
 )
 
 const (

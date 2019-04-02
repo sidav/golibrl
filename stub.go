@@ -1,1 +1,1 @@
-package goLibRL
+package golibrl
