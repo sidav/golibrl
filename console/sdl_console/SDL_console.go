@@ -140,9 +140,11 @@ func PurgeConsole() { // compatibility stub
 }
 
 func Clear_console() {
-	SetFgColorRGB(255, 255, 255)
-	SetBgColorRGB(0, 0, 0)
-	renderer.FillRect(&sdl.Rect{0, 0, winWidth, winHeight})
+	//SetFgColorRGB(255, 255, 255)
+	//SetBgColorRGB(0, 0, 0)
+	//renderer.FillRect(&sdl.Rect{0, 0, winWidth, winHeight})
+	renderer.SetDrawColor(0, 0,0, 255)
+	renderer.FillRect(&sdl.Rect{0, 0, int32(winWidth), int32(winHeight)})
 }
 
 func Flush_console() {
