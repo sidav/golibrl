@@ -217,7 +217,7 @@ func mouseEventWork(ev *tcell.EventMouse) {
 		mouseButton = "NONE"
 	case tcell.Button1:
 		mouseButton = "LEFT"
-	case tcell.Button2:
+	case tcell.Button2, tcell.Button3: // MMB and RMB are equal for now because of linux/windows diffs.
 		mouseButton = "RIGHT"
 	}
 }

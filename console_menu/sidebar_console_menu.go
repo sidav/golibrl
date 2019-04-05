@@ -63,9 +63,9 @@ func ShowSidebarSingleChoiceMenu(title string, titleColor, mx, my, mw int, max_h
 			if !cw.IsMouseHeld() && cw.GetMouseButton() == "LEFT" {
 				return cursorIndex
 			}
-			if !cw.IsMouseHeld() && cw.GetMouseButton() == "RIGHT" {
-				return -1
-			}
+		}
+		if !cw.IsMouseHeld() && cw.GetMouseButton() == "RIGHT" {
+			return -1
 		}
 
 		switch key {
@@ -220,6 +220,8 @@ func ShowSidebarCreateQueueMenu(title string, titleColor, mx, my, mw int, mh int
 			if !cw.IsMouseHeld() && cw.GetMouseButton() == "LEFT" {
 				values = append(values, cursorIndex)
 			}
+		} else if !cw.IsMouseHeld() && cw.GetMouseButton() == "RIGHT" {
+			return values
 		}
 
 		switch key {
