@@ -31,7 +31,7 @@ const ( // for the great compatibility with default console color codes
 var (
 	winTitle                            = "Go-SDL2 Texture"
 	chrW, chrH                    int32 = 10, 16
-	termW, termH                  int32 = 80, 25
+	termW, termH                  int32 = 100, 40
 	winWidth, winHeight                 = termW*chrW, termH*chrH
 	FontPngFileName                     = "assets/font_10x16.png"
 	window                        *sdl.Window
@@ -270,6 +270,7 @@ func windowResizeWork(wEvent *sdl.WindowEvent) {
 	if evnt == sdl.WINDOWEVENT_RESIZED {
 		winWidth, winHeight = wEvent.Data1, wEvent.Data2
 		termW, termH = winWidth/chrW, winHeight/chrH
+		window.SetSize(winWidth, winHeight)
 		wasResized = true
 	}
 }
