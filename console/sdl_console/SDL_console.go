@@ -27,7 +27,7 @@ const ( // for the great compatibility with default console color codes
 	CYAN         = 14
 	WHITE        = 15
 
-	timeForMouseToBeHeld = 75 * time.Millisecond
+	timeForMouseToBeHeld    = 75 * time.Millisecond
 	timeForMouseToBeClicked = 25 * time.Millisecond
 )
 
@@ -70,12 +70,12 @@ var (
 	evCh           chan sdl.Event
 	flushesCounter int
 
-	mouseX, mouseY                      int
-	mouseVectorX, mouseVectorY          int // for getting mouse coords changes
-	mouseButton                         string
-	mouseHeldButton, mouseClickedButton string
-	mouseMoved                          bool
-	timeOfMousePress                    time.Time
+	mouseX, mouseY             int
+	mouseVectorX, mouseVectorY int // for getting mouse coords changes
+	lastMouseButton            string
+	mouseClickedButton         string
+	mouseMoved                 bool
+	timeOfMousePress           time.Time
 
 	// isShiftBeingHeld bool
 )
@@ -299,23 +299,19 @@ func mouseButtonWork(ev *sdl.MouseButtonEvent) { // TODO: completely rewrite the
 			curMouseButton = "RIGHT"
 		}
 	}
-	if curMouseButton != mouseButton {
+	if curMouseButton != lastMouseButton {
 		timeOfMousePress = time.Now()
 	}
 	timeSinceMousePress := time.Since(timeOfMousePress)
 	// set click
 	if curMouseButton == "NONE" {
 		if timeSinceMousePress < timeForMouseToBeClicked {
-			mouseClickedButton = mouseButton
+			mouseClickedButton = lastMouseButton
 		} else {
 			mouseClickedButton = "NONE"
 		}
 	}
-	// set hold
-	if mouseButton == curMouseButton && timeSinceMousePress >= timeForMouseToBeHeld {
-		mouseHeldButton = mouseButton
-	}
-	mouseButton = curMouseButton
+	lastMouseButton = curMouseButton
 }
 
 func GetMouseCoords() (int, int) {
@@ -323,7 +319,11 @@ func GetMouseCoords() (int, int) {
 }
 
 func GetMouseHeldButton() string {
-	return mouseHeldButton
+	timeSinceMousePress := time.Since(timeOfMousePress)
+	if timeSinceMousePress >= timeForMouseToBeHeld {
+		return lastMouseButton
+	}
+	return "NONE"
 }
 
 func GetMouseClickedButton() string {
