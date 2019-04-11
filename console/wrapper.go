@@ -205,7 +205,7 @@ func GetMouseCoords() (int, int) {
 
 func GetMouseHeldButton() string {
 	if selectedRenderer == SDLRenderer {
-		return sdl_console.GetMouseButton()
+		return sdl_console.GetMouseHeldButton()
 	}
 	if selectedRenderer == TCellRenderer {
 		return tcell_console.GetMouseHeldButton()
@@ -215,7 +215,7 @@ func GetMouseHeldButton() string {
 
 func GetMouseClickedButton() string {
 	if selectedRenderer == SDLRenderer {
-		return sdl_console.GetMouseButton()
+		return sdl_console.GetMouseClickedButton()
 	}
 	if selectedRenderer == TCellRenderer {
 		return tcell_console.GetMouseClickedButton()
