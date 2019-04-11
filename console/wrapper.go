@@ -203,24 +203,24 @@ func GetMouseCoords() (int, int) {
 	return -1, -1
 }
 
-func GetMouseButton() string {
+func GetMouseHeldButton() string {
 	if selectedRenderer == SDLRenderer {
 		return sdl_console.GetMouseButton()
 	}
 	if selectedRenderer == TCellRenderer {
-		return tcell_console.GetMouseButton()
+		return tcell_console.GetMouseHeldButton()
 	}
 	return "WRAPPER ERROR"
 }
 
-func IsMouseHeld() bool {
+func GetMouseClickedButton() string {
 	if selectedRenderer == SDLRenderer {
-		return sdl_console.IsMouseHeld()
+		return sdl_console.GetMouseButton()
 	}
 	if selectedRenderer == TCellRenderer {
-		return tcell_console.IsMouseHeld()
+		return tcell_console.GetMouseClickedButton()
 	}
-	return false
+	return "WRAPPER ERROR"
 }
 
 func WasMouseMovedSinceLastEvent() bool {

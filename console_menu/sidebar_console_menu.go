@@ -60,11 +60,11 @@ func ShowSidebarSingleChoiceMenu(title string, titleColor, mx, my, mw int, max_h
 		_, mousey := cw.GetMouseCoords()
 		if isMouseInMenuBounds(mx, my, mw, len(items)+1) {
 			cursorIndex = mousey - my - 1
-			if !cw.IsMouseHeld() && cw.GetMouseButton() == "LEFT" {
+			if cw.GetMouseClickedButton() == "LEFT" {
 				return cursorIndex
 			}
 		}
-		if !cw.IsMouseHeld() && cw.GetMouseButton() == "RIGHT" {
+		if cw.GetMouseClickedButton() == "RIGHT" {
 			return -1
 		}
 
@@ -209,7 +209,7 @@ func ShowSidebarCreateQueueMenu(title string, titleColor, mx, my, mw int, mh int
 		_, mousey := cw.GetMouseCoords()
 		if isMouseInMenuBounds(mx, my, mw, len(items)+1) {
 			cursorIndex = mousey - my - 1
-			if !cw.IsMouseHeld() && cw.GetMouseButton() == "RIGHT" {
+			if cw.GetMouseClickedButton() == "RIGHT" {
 				for i := len(values) - 1; i >= 0; i-- {
 					if values[i] == cursorIndex {
 						values = append(values[:i], values[i+1:]...) // removes i-th element
@@ -217,10 +217,10 @@ func ShowSidebarCreateQueueMenu(title string, titleColor, mx, my, mw int, mh int
 					}
 				}
 			}
-			if !cw.IsMouseHeld() && cw.GetMouseButton() == "LEFT" {
+			if cw.GetMouseClickedButton() == "LEFT" {
 				values = append(values, cursorIndex)
 			}
-		} else if !cw.IsMouseHeld() && cw.GetMouseButton() == "RIGHT" {
+		} else if cw.GetMouseClickedButton() == "RIGHT" {
 			return values
 		}
 

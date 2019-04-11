@@ -16,11 +16,14 @@ var (
 	evCh           chan tcell.Event
 	flushesCounter int
 
+	// mouse vars
 	mouseX, mouseY             int
 	mouseVectorX, mouseVectorY int // for getting mouse coords changes
 	mouseButton                string
-	mouseHeld                  bool
+	mouseHeldButton            string
+	mouseClickedButton         string
 	mouseMoved                 bool
+	timeOfMousePress           time.Time
 )
 
 /* PUBLIC SHIT BELOW */
@@ -42,6 +45,9 @@ const (
 	MAGENTA      = 13
 	CYAN         = 14
 	WHITE        = 15
+
+	timeForMouseToBeHeld = 100 * time.Millisecond
+	timeForMouseToBeClicked = 15 * time.Millisecond
 )
 
 func Init_console() {
@@ -154,9 +160,6 @@ func ReadKey() string {
 }
 
 func ReadKeyAsync() string { // also reads mouse events... TODO: think of if separate mouse events reader is needed.
-
-	mouseHeld = mouseButton != "NONE"
-
 	if len(evCh) == 0 {
 		return "NOTHING"
 	}
@@ -206,32 +209,47 @@ func eventToKeyString(ev *tcell.EventKey) string {
 func mouseEventWork(ev *tcell.EventMouse) {
 	mx, my := ev.Position()
 	if mouseX != mx || mouseY != my {
-		mouseVectorX = mx-mouseX
-		mouseVectorY = my-mouseY
+		mouseVectorX = mx - mouseX
+		mouseVectorY = my - mouseY
 		mouseX, mouseY = mx, my
 		mouseMoved = true
 	}
-	// PrevMouseButton = mouseButton
+	curMouseButton := "NONE"
 	switch ev.Buttons() {
 	case tcell.ButtonNone:
-		mouseButton = "NONE"
+		curMouseButton = "NONE"
 	case tcell.Button1:
-		mouseButton = "LEFT"
+		curMouseButton = "LEFT"
 	case tcell.Button2, tcell.Button3: // MMB and RMB are equal for now because of linux/windows diffs.
-		mouseButton = "RIGHT"
+		curMouseButton = "RIGHT"
 	}
+	if curMouseButton != mouseButton {
+		timeOfMousePress = time.Now()
+	}
+	timeSinceMousePress := time.Since(timeOfMousePress)
+	// set click
+	if curMouseButton == "NONE" && timeSinceMousePress < timeForMouseToBeClicked {
+		mouseClickedButton = mouseButton
+	}
+	// set hold
+	if mouseButton == curMouseButton && timeSinceMousePress >= timeForMouseToBeHeld {
+		mouseHeldButton = mouseButton
+	}
+	mouseButton = curMouseButton
 }
 
 func GetMouseCoords() (int, int) {
 	return mouseX, mouseY
 }
 
-func GetMouseButton() string {
-	return mouseButton
+func GetMouseHeldButton() string {
+	return mouseHeldButton
 }
 
-func IsMouseHeld() bool {
-	return mouseHeld
+func GetMouseClickedButton() string {
+	b := mouseClickedButton
+	mouseClickedButton = "NONE"
+	return b
 }
 
 func WasMouseMovedSinceLastEvent() bool {
