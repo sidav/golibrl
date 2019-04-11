@@ -46,8 +46,8 @@ const (
 	CYAN         = 14
 	WHITE        = 15
 
-	timeForMouseToBeHeld = 100 * time.Millisecond
-	timeForMouseToBeClicked = 15 * time.Millisecond
+	timeForMouseToBeHeld = 75 * time.Millisecond
+	timeForMouseToBeClicked = 25 * time.Millisecond
 )
 
 func Init_console() {
@@ -228,8 +228,12 @@ func mouseEventWork(ev *tcell.EventMouse) {
 	}
 	timeSinceMousePress := time.Since(timeOfMousePress)
 	// set click
-	if curMouseButton == "NONE" && timeSinceMousePress < timeForMouseToBeClicked {
-		mouseClickedButton = mouseButton
+	if curMouseButton == "NONE" {
+		if timeSinceMousePress < timeForMouseToBeClicked {
+			mouseClickedButton = mouseButton
+		} else {
+			mouseClickedButton = "NONE"
+		}
 	}
 	// set hold
 	if mouseButton == curMouseButton && timeSinceMousePress >= timeForMouseToBeHeld {
