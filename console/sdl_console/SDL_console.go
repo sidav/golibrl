@@ -26,6 +26,9 @@ const ( // for the great compatibility with default console color codes
 	MAGENTA      = 13
 	CYAN         = 14
 	WHITE        = 15
+
+	timeForMouseToBeHeld = 75 * time.Millisecond
+	timeForMouseToBeClicked = 25 * time.Millisecond
 )
 
 var (
@@ -283,18 +286,18 @@ func mouseMoveWork(ev *sdl.MouseMotionEvent) {
 	}
 }
 
-func mouseButtonWork(ev *sdl.MouseButtonEvent) {
+func mouseButtonWork(ev *sdl.MouseButtonEvent) { // TODO: completely rewrite the method 
 	// PrevMouseButton = mouseHeldButton
-	if ev.Type == sdl.MOUSEBUTTONUP {
-		mouseHeldButton = "NONE"
-		return
-	}
 	var curMouseButton string
-	switch ev.Button {
-	case sdl.BUTTON_LEFT:
-		curMouseButton = "LEFT"
-	case sdl.BUTTON_RIGHT:
-		curMouseButton = "RIGHT"
+	if ev.Type == sdl.MOUSEBUTTONUP {
+		curMouseButton = "NONE"
+	} else {
+		switch ev.Button {
+		case sdl.BUTTON_LEFT:
+			curMouseButton = "LEFT"
+		case sdl.BUTTON_RIGHT:
+			curMouseButton = "RIGHT"
+		}
 	}
 	if curMouseButton != mouseButton {
 		timeOfMousePress = time.Now()
