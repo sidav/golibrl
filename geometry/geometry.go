@@ -24,8 +24,8 @@ func AreRectsInRange(x1, y1, w1, h1, x2, y2, w2, h2, r int) bool {
 	
 	left := x2b < x1
 	right := x1b < x2
-	bottom := y2b < y1
-	top := y1b < y2
+	bottom := y1b < y2
+	top := y2b < y1
 	if top && left {
 		return AreCoordsInRange(x1, y1, x2b, y2b, r) // dist((x1, y1b), (x2b, y2))
 	}
