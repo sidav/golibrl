@@ -53,6 +53,38 @@ func AreRectsInRange(x1, y1, w1, h1, x2, y2, w2, h2, r int) bool {
 	return true // intersect detected
 }
 
+func GetCellNearestToRectFrom(rx, ry, w, h, fx, fy int) (int, int) { // returns a cell closest to rectangle
+	left := fx < rx
+	right := fx > rx+w-1
+	bottom := fy > ry+h-1
+	top := fy < ry
+	if top && left {
+		return rx-1, ry-1
+	}
+	if left && bottom {
+		return rx-1, ry+h
+	}
+	if bottom && right {
+		return rx+w, ry+h
+	}
+	if right && top {
+		return rx+w, ry-1
+	}
+	if left {
+		return rx-1, fy
+	}
+	if right {
+		return rx+w, fy
+	}
+	if bottom {
+		return fx, ry+h
+	}
+	if top {
+		return fx, ry-1
+	}
+	return fx, fy // intersect
+}
+
 func getSqDistanceBetween(x1, y1, x2, y2 int) int {
 	return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
 }
