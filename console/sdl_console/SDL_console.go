@@ -26,20 +26,23 @@ const ( // for the great compatibility with default console color codes
 	MAGENTA      = 13
 	CYAN         = 14
 	WHITE        = 15
+
+	timeForMouseToBeHeld    = 75 * time.Millisecond
+	timeForMouseToBeClicked = 25 * time.Millisecond
 )
 
 var (
-	winTitle                            = "Go-SDL2 Texture"
-	chrW, chrH                    int32 = 10, 16
-	termW, termH                  int32 = 100, 40
-	winWidth, winHeight                 = termW*chrW, termH*chrH
-	FontPngFileName                     = "assets/font_10x16.png"
-	window                        *sdl.Window
-	renderer                      *sdl.Renderer
-	texture                       *sdl.Texture
-	fontImg                       *sdl.Surface
-	src, dst                      sdl.Rect
-	err                           error
+	winTitle                  = "Go-SDL2 Texture"
+	chrW, chrH          int32 = 10, 16
+	termW, termH        int32 = 100, 40
+	winWidth, winHeight       = termW*chrW, termH*chrH
+	FontPngFileName           = "assets/font_10x16.png"
+	window              *sdl.Window
+	renderer            *sdl.Renderer
+	texture             *sdl.Texture
+	fontImg             *sdl.Surface
+	src, dst            sdl.Rect
+	err                 error
 
 	fgColor = []uint8{255, 255, 255}
 	bgColor = []uint8{0, 0, 0}
@@ -69,9 +72,10 @@ var (
 
 	mouseX, mouseY             int
 	mouseVectorX, mouseVectorY int // for getting mouse coords changes
-	mouseButton                string
-	mouseHeld                  bool
+	lastMouseButton            string
+	mouseClickedButton         string
 	mouseMoved                 bool
+	timeOfMousePress           time.Time
 
 	// isShiftBeingHeld bool
 )
@@ -98,7 +102,7 @@ func Init_console(title string) {
 		return
 	}
 
-	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)//sdl.RENDERER_ACCELERATED)
+	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE) //sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create renderer: %s\n", err)
 		return
@@ -143,7 +147,7 @@ func Clear_console() {
 	//SetFgColorRGB(255, 255, 255)
 	//SetBgColorRGB(0, 0, 0)
 	//renderer.FillRect(&sdl.Rect{0, 0, winWidth, winHeight})
-	renderer.SetDrawColor(0, 0,0, 255)
+	renderer.SetDrawColor(0, 0, 0, 255)
 	renderer.FillRect(&sdl.Rect{0, 0, int32(winWidth), int32(winHeight)})
 }
 
@@ -232,9 +236,6 @@ func ReadKey() string {
 }
 
 func ReadKeyAsync() string { // also reads mouse events... TODO: think of if separate mouse events reader is needed.
-
-	mouseHeld = mouseButton != "NONE"
-
 	if len(evCh) == 0 {
 		return "NOTHING"
 	}
@@ -285,30 +286,50 @@ func mouseMoveWork(ev *sdl.MouseMotionEvent) {
 	}
 }
 
-func mouseButtonWork(ev *sdl.MouseButtonEvent) {
-	// PrevMouseButton = mouseButton
+func mouseButtonWork(ev *sdl.MouseButtonEvent) { // TODO: completely rewrite the method 
+	// PrevMouseButton = mouseHeldButton
+	var curMouseButton string
 	if ev.Type == sdl.MOUSEBUTTONUP {
-		mouseButton = "NONE"
-		return
+		curMouseButton = "NONE"
+	} else {
+		switch ev.Button {
+		case sdl.BUTTON_LEFT:
+			curMouseButton = "LEFT"
+		case sdl.BUTTON_RIGHT:
+			curMouseButton = "RIGHT"
+		}
 	}
-	switch ev.Button {
-	case sdl.BUTTON_LEFT:
-		mouseButton = "LEFT"
-	case sdl.BUTTON_RIGHT:
-		mouseButton = "RIGHT"
+	if curMouseButton != lastMouseButton {
+		timeOfMousePress = time.Now()
 	}
+	timeSinceMousePress := time.Since(timeOfMousePress)
+	// set click
+	if curMouseButton == "NONE" {
+		if timeSinceMousePress < timeForMouseToBeClicked {
+			mouseClickedButton = lastMouseButton
+		} else {
+			mouseClickedButton = "NONE"
+		}
+	}
+	lastMouseButton = curMouseButton
 }
 
 func GetMouseCoords() (int, int) {
 	return mouseX, mouseY
 }
 
-func GetMouseButton() string {
-	return mouseButton
+func GetMouseHeldButton() string {
+	timeSinceMousePress := time.Since(timeOfMousePress)
+	if timeSinceMousePress >= timeForMouseToBeHeld {
+		return lastMouseButton
+	}
+	return "NONE"
 }
 
-func IsMouseHeld() bool {
-	return mouseHeld
+func GetMouseClickedButton() string {
+	b := mouseClickedButton
+	mouseClickedButton = "NONE"
+	return b
 }
 
 func WasMouseMovedSinceLastEvent() bool {

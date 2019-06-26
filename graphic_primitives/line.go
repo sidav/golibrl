@@ -1,10 +1,10 @@
 package graphic_primitives
 
-type point struct {
+type Point struct {
 	X, Y int
 }
 
-func (p *point) GetCoords() (int, int) {
+func (p *Point) GetCoords() (int, int) {
 	return p.X, p.Y
 }
 
@@ -15,8 +15,8 @@ func abs(x int) int {
 	return x
 }
 
-func GetLine(fromx, fromy, tox, toy int) []point {
-	line := make([]point, 0)
+func GetLine(fromx, fromy, tox, toy int) []Point {
+	line := make([]Point, 0)
 	deltax := abs(tox - fromx)
 	deltay := abs(toy - fromy)
 	xmod := 1
@@ -32,7 +32,7 @@ func GetLine(fromx, fromy, tox, toy int) []point {
 		y := fromy
 		deltaerr := deltay
 		for x := fromx; x != tox+xmod; x += xmod {
-			line = append(line, point{x, y})
+			line = append(line, Point{x, y})
 			error += deltaerr
 			if 2*error >= deltax {
 				y += ymod
@@ -43,7 +43,7 @@ func GetLine(fromx, fromy, tox, toy int) []point {
 		x := fromx
 		deltaerr := deltax
 		for y := fromy; y != toy+ymod; y += ymod {
-			line = append(line, point{x, y})
+			line = append(line, Point{x, y})
 			error += deltaerr
 			if 2*error >= deltay {
 				x += xmod
@@ -54,8 +54,8 @@ func GetLine(fromx, fromy, tox, toy int) []point {
 	return line
 }
 
-func GetLineOver(fromx, fromy, tox, toy, length int) []point { // returns line of fixed length which does not stop at (tox, toy)
-	line := make([]point, 0)
+func GetLineOver(fromx, fromy, tox, toy, length int) []Point { // returns line of fixed length which does not stop at (tox, toy)
+	line := make([]Point, 0)
 	deltax := abs(tox - fromx)
 	deltay := abs(toy - fromy)
 	xmod := 1
@@ -71,7 +71,7 @@ func GetLineOver(fromx, fromy, tox, toy, length int) []point { // returns line o
 		y := fromy
 		deltaerr := deltay
 		for x := fromx; len(line) < length; x += xmod {
-			line = append(line, point{x, y})
+			line = append(line, Point{x, y})
 			error += deltaerr
 			if 2*error >= deltax {
 				y += ymod
@@ -82,7 +82,7 @@ func GetLineOver(fromx, fromy, tox, toy, length int) []point { // returns line o
 		x := fromx
 		deltaerr := deltax
 		for y := fromy; len(line) < length; y += ymod {
-			line = append(line, point{x, y})
+			line = append(line, Point{x, y})
 			error += deltaerr
 			if 2*error >= deltay {
 				x += xmod
@@ -93,7 +93,7 @@ func GetLineOver(fromx, fromy, tox, toy, length int) []point { // returns line o
 	return line
 }
 //
-//func GetLastPointOfLineOver(fromx, fromy, tox, toy, length int) (int, int) { // returns last point of the line of fixed length which does not stop at (tox, toy)
+//func GetLastPointOfLineOver(fromx, fromy, tox, toy, length int) (int, int) { // returns last Point of the line of fixed length which does not stop at (tox, toy)
 //	currLength := 1
 //	deltax := abs(tox - fromx)
 //	deltay := abs(toy - fromy)
