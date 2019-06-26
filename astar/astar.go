@@ -1,10 +1,10 @@
 package astar
 
 const (
-	DIAGONAL_COST = 14
-	STRAIGHT_COST = 10
-	HEURISTIC_MULTIPLIER = 10
-	MAX_PATHFINDING_STEPS = 175 // Increase in case of stupid pathfinding. Decrease in case of lag.
+	DIAGONAL_COST             = 14
+	STRAIGHT_COST             = 10
+	HEURISTIC_MULTIPLIER      = 10
+	DEFAULT_PATHFINDING_STEPS = 175 // Increase in case of stupid pathfinding. Decrease in case of lag.
 )
 
 type Cell struct {
@@ -83,12 +83,15 @@ func (c *Cell) setChildsForPath() {
 	return
 }
 
-func FindPath(costMap *[][]int, fromx, fromy, tox, toy int, diagonalMoveAllowed, forceGetPath, forceIncludeFinish bool) *Cell {
+func FindPath(costMap *[][]int, fromx, fromy, tox, toy int, diagonalMoveAllowed bool, maxSearchDepth int, forceGetPath, forceIncludeFinish bool) *Cell {
 	openList := make([]*Cell, 0)
 	closedList := make([]*Cell, 0)
 	var currentCell *Cell
 	total_steps := 0
 	targetReached := false
+	if maxSearchDepth < 1 {
+		maxSearchDepth = DEFAULT_PATHFINDING_STEPS
+	}
 
 	// step 1
 	origin := &Cell{X: fromx, Y: fromy, costToMoveThere: 0, h: heuristicCost(fromx, fromy, tox, toy, diagonalMoveAllowed)}
@@ -111,7 +114,7 @@ func FindPath(costMap *[][]int, fromx, fromy, tox, toy int, diagonalMoveAllowed,
 			currentCell.setChildsForPath()
 			return origin
 		}
-		if len(openList) == 0 || total_steps > MAX_PATHFINDING_STEPS {
+		if len(openList) == 0 || total_steps > maxSearchDepth {
 			if forceGetPath { // makes the routine always return path to the closest possible cell to (tox, toy) even if the precise path does not exist.
 				currentCell = getCellWithLowestHeuristicFromList(&closedList)
 				currentCell.setChildsForPath()
