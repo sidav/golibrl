@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+// DEPRECATED: move to random_struct instead!
+
 const (
 	a = 2416
 	c = 374441
