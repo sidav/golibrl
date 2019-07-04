@@ -11,15 +11,8 @@ func main() {
 	//	fmt.Println(s)
 	//}
 
-	land := Fractal_landscape.GenHeightMap(65, 33)
+	land := Fractal_landscape.GenHeightMap(129, 65)
 	// return
-	//for i := 0; i < len(*land); i++ {
-	//	str := ""
-	//	for j := 0; j < len((*land)[0]); j++ {
-	//		str += strconv.Itoa((*land)[i][j])
-	//	}
-	//	fmt.Println(str)
-	//}
 
 	console.Init_console("test", console.TCellRenderer)
 	defer console.Close_console()
@@ -28,6 +21,9 @@ func main() {
 		str := ' '
 		for j := 0; j < len((*land)[0]); j++ {
 			switch cur := (*land)[i][j]; {
+			case cur < -10:
+				str = '~'
+				console.SetFgColor(console.DARK_BLUE)
 			case cur < 0:
 				str = '~'
 				console.SetFgColor(console.BLUE)
@@ -40,7 +36,10 @@ func main() {
 			case cur < 40:
 				str = 'T'
 				console.SetFgColor(console.GREEN)
-			case cur < 999:
+			case cur < 50:
+				str = '^'
+				console.SetFgColor(console.DARK_GRAY)
+			default:
 				str = '^'
 				console.SetFgColor(console.WHITE)
 			}
