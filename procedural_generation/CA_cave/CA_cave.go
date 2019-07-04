@@ -1,4 +1,4 @@
-package procedural_generation
+package CA_cave
 
 import (
 	"time"
