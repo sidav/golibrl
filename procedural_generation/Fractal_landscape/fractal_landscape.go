@@ -25,13 +25,31 @@ func GenHeightMap(w, h int) *[][]int {
 
 func initHeightMap(fullMap *[][]int) {
 	w, h := len(*fullMap), len((*fullMap)[0])
-	(*fullMap)[0][0] = -20
-	(*fullMap)[0][h-1] = -20
-	(*fullMap)[w-1][0] = -20
-	(*fullMap)[w-1][h-1] = -20
-	(*fullMap)[w/2][h/2] = 65
-	(*fullMap)[w/4][h/2+h/4] = 45
-	(*fullMap)[w/4+w/2][h/2] = 45
+	var (
+		cornerFrom = -40
+		cornerTo = -5
+		centerFrom = 0
+		centerTo   = 100
+		subcFrom   = -20
+		subcTo     = 65
+	)
+	// corners
+	(*fullMap)[0][0] = rnd.RandInRange(cornerFrom, cornerTo)
+	(*fullMap)[0][h-1] = rnd.RandInRange(cornerFrom, cornerTo)
+	(*fullMap)[w-1][0] = rnd.RandInRange(cornerFrom, cornerTo)
+	(*fullMap)[w-1][h-1] = rnd.RandInRange(cornerFrom, cornerTo)
+	// center
+	(*fullMap)[w/2][h/2] = rnd.RandInRange(centerFrom, centerTo)
+	// fractal sub-centers
+	(*fullMap)[w/4][h/4] = rnd.RandInRange(subcFrom, subcTo)
+	(*fullMap)[w/4][h/2] = rnd.RandInRange(subcFrom, subcTo)
+	(*fullMap)[w/4][h/2+h/4] = rnd.RandInRange(subcFrom, subcTo)
+	(*fullMap)[w/2][h/4] = rnd.RandInRange(subcFrom, subcTo)
+	(*fullMap)[w/2][h/2] = rnd.RandInRange(subcFrom, subcTo)
+	(*fullMap)[w/2][h/2+h/4] = rnd.RandInRange(subcFrom, subcTo)
+	(*fullMap)[w/2+w/4][h/4] = rnd.RandInRange(subcFrom, subcTo)
+	(*fullMap)[w/2+w/4][h/2] = rnd.RandInRange(subcFrom, subcTo)
+	(*fullMap)[w/2+w/4][h/2+h/4] = rnd.RandInRange(subcFrom, subcTo)
 }
 
 func iterate(fullMap *[][]int) {
