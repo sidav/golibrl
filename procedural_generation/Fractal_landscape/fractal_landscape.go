@@ -76,7 +76,7 @@ func doSquareMidpoint(fullMap *[][]int, x, y, w, spreadBorder, spreadCenter int)
 	rightX := x + w - 1
 	midY := y + w/2
 	botY := y + w - 1
-
+	sizeIsEven := w%2 == 0 
 	// midpoint left side of square
 	if (*fullMap)[x][midY] == 0 {
 		(*fullMap)[x][midY] = jitterAvg2((*fullMap)[x][y], (*fullMap)[x][botY], spreadBorder)
@@ -97,9 +97,35 @@ func doSquareMidpoint(fullMap *[][]int, x, y, w, spreadBorder, spreadCenter int)
 	if (*fullMap)[midX][midY] == 0 {
 		(*fullMap)[midX][midY] = jitterAvg4((*fullMap)[x][midY], (*fullMap)[rightX][midY], (*fullMap)[midX][y], (*fullMap)[midX][botY], spreadCenter)
 	}
+	if sizeIsEven {
+		// midpoint left side of square
+		if (*fullMap)[x][midY-1] == 0 {
+			(*fullMap)[x][midY-1] = jitterAvg2((*fullMap)[x][y], (*fullMap)[x][botY], spreadBorder)
+		}
+		// midpoint right side of square
+		if (*fullMap)[rightX][midY-1] == 0 {
+			(*fullMap)[rightX][midY-1] = jitterAvg2((*fullMap)[rightX][y], (*fullMap)[rightX][botY], spreadBorder)
+		}
+		// midpoint top side of a square
+		if (*fullMap)[midX-1][y] == 0 {
+			(*fullMap)[midX-1][y] = jitterAvg2((*fullMap)[x][y], (*fullMap)[rightX][y], spreadBorder)
+		}
+		// midpoint bottom side of a square
+		if (*fullMap)[midX-1][botY] == 0 {
+			(*fullMap)[midX-1][botY] = jitterAvg2((*fullMap)[x][botY], (*fullMap)[rightX][botY], spreadBorder)
+		}
+		//midpoint center of a square
+		(*fullMap)[midX-1][midY-1] = (*fullMap)[midX][midY]
+		(*fullMap)[midX][midY-1] = (*fullMap)[midX][midY]
+		(*fullMap)[midX-1][midY] = (*fullMap)[midX][midY]
+	}
 }
 
 // boredom below
+
+func isPowerOfTwo(x int) bool {
+	return (x & (x - 1)) == 0
+}
 
 func sliceMinMax(arr []int) (int, int) {
 	min := arr[0]
