@@ -10,42 +10,44 @@ func main() {
 	//for _, s := range *cave {
 	//	fmt.Println(s)
 	//}
-
-	land := Fractal_landscape.GenHeightMap(129, 65)
-	// return
-
 	console.Init_console("test", console.TCellRenderer)
 	defer console.Close_console()
-	console.SetFgColor(console.WHITE)
-	for i := 0; i < len(*land); i++ {
-		str := ' '
-		for j := 0; j < len((*land)[0]); j++ {
-			switch cur := (*land)[i][j]; {
-			case cur < -10:
-				str = '~'
-				console.SetFgColor(console.DARK_BLUE)
-			case cur < 0:
-				str = '~'
-				console.SetFgColor(console.BLUE)
-			case cur < 9:
-				str = '.'
-				console.SetFgColor(console.YELLOW)
-			case cur < 22:
-				str = ','
-				console.SetFgColor(console.DARK_YELLOW)
-			case cur < 40:
-				str = 'T'
-				console.SetFgColor(console.GREEN)
-			case cur < 50:
-				str = '^'
-				console.SetFgColor(console.DARK_GRAY)
-			default:
-				str = '^'
-				console.SetFgColor(console.WHITE)
+	key := ""
+	for key != "ESCAPE" {
+		land := Fractal_landscape.GenHeightMap(129, 65)
+		// return
+
+		console.SetFgColor(console.WHITE)
+		for i := 0; i < len(*land); i++ {
+			str := ' '
+			for j := 0; j < len((*land)[0]); j++ {
+				switch cur := (*land)[i][j]; {
+				case cur < -10:
+					str = '~'
+					console.SetFgColor(console.DARK_BLUE)
+				case cur < 0:
+					str = '~'
+					console.SetFgColor(console.BLUE)
+				case cur < 9:
+					str = '.'
+					console.SetFgColor(console.YELLOW)
+				case cur < 22:
+					str = ','
+					console.SetFgColor(console.DARK_YELLOW)
+				case cur < 40:
+					str = 'T'
+					console.SetFgColor(console.GREEN)
+				case cur < 50:
+					str = '^'
+					console.SetFgColor(console.DARK_GRAY)
+				default:
+					str = '^'
+					console.SetFgColor(console.WHITE)
+				}
+				console.PutChar(str, i, j)
 			}
-			console.PutChar(str, i, j)
 		}
+		console.Flush_console()
+		key = console.ReadKey()
 	}
-	console.Flush_console()
-	console.ReadKey()
 }
