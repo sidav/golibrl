@@ -3,13 +3,14 @@ package main
 import (
 	"fmt"
 	"github.com/sidav/golibrl/console"
-	"github.com/sidav/golibrl/console_menu"
+	"github.com/sidav/golibrl/fov/basic_bresenham_fov"
 	"github.com/sidav/golibrl/fov/basic_two_step_fov"
 	"github.com/sidav/golibrl/fov/optimized_strict_definition_fov"
 	"github.com/sidav/golibrl/fov/strict_definition_fov"
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -108,17 +109,7 @@ func testFOV() {
 			fovRadius++
 		case "ENTER":
 			// test-shmest
-			str := ""
-			for i:=1; i<=3;i++ {
-				name:=""
-				start := time.Now()
-				for j := 0; j < 10000; j++ {
-					_, name = getVisMapAndNameForAlgorithm(i, px, py, fovRadius, &opacityMap)
-				}
-				taken := time.Now().Sub(start) / time.Millisecond
-				str += fmt.Sprintf("%s:%d ms; ", name, taken)
-			}
-			console_menu.ShowSimpleYNChoiceModalWindow(str)
+			fovAlgsPerfomanceCheck(px, py, w, h, fovRadius, &opacityMap)
 		default:
 			currentFovSelected, _ = strconv.Atoi(key)
 		}
@@ -132,17 +123,51 @@ func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius int, opa
 	case 1:
 		strict_definition_fov.SetOpacityMap(opacityMap)
 		visMap = strict_definition_fov.Fov(px, py, fovRadius)
-		currentFovAlgorithmName = "Strict Definition FOV"
+		currentFovAlgorithmName = "SDFOV"
 	case 2:
 		optimized_strict_definition_fov.SetOpacityMap(opacityMap)
 		visMap = optimized_strict_definition_fov.Fov(px, py, fovRadius)
-		currentFovAlgorithmName = "Optimized Strict Definition FOV"
+		currentFovAlgorithmName = "Optimized SDFOV"
+	case 3:
+		basic_bresenham_fov.SetOpacityMap(opacityMap)
+		visMap = basic_bresenham_fov.GetCircleVisibilityMap(px, py, fovRadius)
+		currentFovAlgorithmName = "Bresenham FOV"
 	default:
 		basic_two_step_fov.SetOpacityMap(opacityMap)
 		visMap = basic_two_step_fov.GetCircleVisibilityMap(px, py, fovRadius)
 		currentFovAlgorithmName = "Two-step FOV"
 	}
 	return visMap, currentFovAlgorithmName
+}
+
+func fovAlgsPerfomanceCheck(px, py, w, h, fovRadius int, opacityMap *[][]bool) {
+	const totalAlgs = 4
+	const MillisecondsToTest = 1000
+	console.SetBgColor(console.DARK_GRAY)
+	console.SetFgColor(console.BLACK)
+	borderW := 40
+	border := strings.Repeat(" ", borderW)
+	console.PutString(border, w/2 - borderW/2, h/2-totalAlgs-1)
+	console.PutString(fmt.Sprintf("    Testing %d algs for %d ms:", totalAlgs, MillisecondsToTest), w/2 - borderW/2, h/2-totalAlgs-1)
+	console.PutString(border, w/2 - borderW/2, h/2-totalAlgs)
+	console.Flush_console()
+	for i:=1; i<=totalAlgs;i++ {
+		name:=""
+		taken := 0
+		start := time.Now()
+		for time.Now().Sub(start) / time.Millisecond < MillisecondsToTest {
+			_, name = getVisMapAndNameForAlgorithm(i, px, py, fovRadius, opacityMap)
+			taken++
+		}
+		console.PutString(fmt.Sprintf(" %s:%d calculations; ", name, taken), w/2 - borderW/2, h/2-totalAlgs-1+i)
+		console.PutString(border, w/2 - borderW/2, h/2-totalAlgs+i)
+		console.Flush_console()
+	}
+	console.PutString(border, w/2 - borderW/2, h/2+1)
+	console.PutString("    <Perfomance tests finished> ", w/2 - borderW/2, h/2+1)
+	console.Flush_console()
+	console.SetBgColor(console.BLACK)
+	console.ReadKey()
 }
 
 func testCave() {
