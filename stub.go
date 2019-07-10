@@ -20,9 +20,26 @@ func main() {
 	}
 }
 
+var fovTestMap = &[]string {
+	"#.#......##",
+	"#.#....#..#",
+	"#.#..#.....",
+	"#.#...#..#.",
+	"#.#....#...",
+	"#.#........",
+	"#..........",
+	"#.#........",
+	"#.#........",
+	"#.#........",
+	"#.#........",
+	"#.#.....#..",
+	"#.#........",
+}
+
 func testFOV() {
 	w, h := console.GetConsoleSize()
-	cave := CA_cave.MakeCave(w, h, 3, -1)
+	cave := fovTestMap // CA_cave.MakeCave(w, h, 3, -1)
+	w, h = len(*fovTestMap), len((*fovTestMap)[0])
 	px, py := w/2, h/2
 
 	opacityMap := make([][]bool, w)
