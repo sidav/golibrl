@@ -2,9 +2,11 @@ package main
 
 import (
 	"github.com/sidav/golibrl/console"
+	"github.com/sidav/golibrl/fov/basic_two_step_fov"
 	"github.com/sidav/golibrl/fov/strict_definition_fov"
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
+	"strconv"
 )
 
 func main() {
@@ -20,7 +22,7 @@ func main() {
 	}
 }
 
-var fovTestMap = &[]string {
+var fovTestMap = &[]string{
 	"#.#......##",
 	"#.#....#..#",
 	"#.#..#.....",
@@ -37,10 +39,14 @@ var fovTestMap = &[]string {
 }
 
 func testFOV() {
+	currentFovSelected := 1
+	currentFovAlgorithmName := "UNSELECTED"
+	fovRadius := 15
+
 	w, h := console.GetConsoleSize()
-	cave := CA_cave.MakeCave(w, h, 3, -1)
-	cave = fovTestMap
-	w, h = len(*fovTestMap), len((*fovTestMap)[0])
+	cave := CA_cave.MakeCave(w, h, 3, 1)
+	//cave = fovTestMap
+	//w, h = len(*fovTestMap), len((*fovTestMap)[0])
 
 	px, py := w/2, h/2
 
@@ -57,12 +63,20 @@ func testFOV() {
 		}
 	}
 
-	strict_definition_fov.SetOpacityMap(&opacityMap)
-
 	key := ""
 	for key != "ESCAPE" {
 		// getVisibilityMap
-		visMap := strict_definition_fov.Fov(px, py, 5) // <--- CHANGE THIS LINE FOR TESTING OTHER FOV ALGORITHMS!
+		var visMap *[][]bool
+		switch currentFovSelected {
+		case 1:
+			strict_definition_fov.SetOpacityMap(&opacityMap)
+			visMap = strict_definition_fov.Fov(px, py, fovRadius)
+			currentFovAlgorithmName = "Strict Definition FOV"
+		default:
+			basic_two_step_fov.SetOpacityMap(&opacityMap)
+			visMap = basic_two_step_fov.GetCircleVisibilityMap(px, py, fovRadius)
+			currentFovAlgorithmName = "Two-step FOV"
+		}
 
 		// render map
 		for i := 0; i < len(*cave); i++ {
@@ -82,6 +96,7 @@ func testFOV() {
 		}
 		console.SetFgColor(console.WHITE)
 		console.PutChar('@', px, py)
+		console.PutString(currentFovAlgorithmName, 0, 0)
 		console.Flush_console()
 
 		key = console.ReadKey()
@@ -94,6 +109,12 @@ func testFOV() {
 			px--
 		case "RIGHT":
 			px++
+		case "-":
+			fovRadius--
+		case "+", "=":
+			fovRadius++
+		case "1", "2", "3":
+			currentFovSelected, _ = strconv.Atoi(key)
 		}
 	}
 }
