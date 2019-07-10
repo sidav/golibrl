@@ -48,9 +48,9 @@ func MakeCave(w, h, smoothness, seed int) *[]string {
 
 func randomInitialFill(w, h int) *[]string {
 	const WALL_PERCENTAGE = 35
-	cave := make([]string, h)
+	cave := make([]string, w)
 	for ind := range cave {
-		for i := 0; i < w; i++ {
+		for i := 0; i < h; i++ {
 			if ind - h/2 <= 2 && ind - h/2 > -2 {
 				cave[ind] += "."
 				continue

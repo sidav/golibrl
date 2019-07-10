@@ -15,7 +15,7 @@ func abs(x int) int {
 	return x
 }
 
-func GetLine(fromx, fromy, tox, toy int) []Point {
+func GetLine(fromx, fromy, tox, toy int) *[]Point {
 	line := make([]Point, 0)
 	deltax := abs(tox - fromx)
 	deltay := abs(toy - fromy)
@@ -51,10 +51,10 @@ func GetLine(fromx, fromy, tox, toy int) []Point {
 			}
 		}
 	}
-	return line
+	return &line
 }
 
-func GetLineOver(fromx, fromy, tox, toy, length int) []Point { // returns line of fixed length which does not stop at (tox, toy)
+func GetLineOver(fromx, fromy, tox, toy, length int) *[]Point { // returns line of fixed length which does not stop at (tox, toy)
 	line := make([]Point, 0)
 	deltax := abs(tox - fromx)
 	deltay := abs(toy - fromy)
@@ -90,7 +90,7 @@ func GetLineOver(fromx, fromy, tox, toy, length int) []Point { // returns line o
 			}
 		}
 	}
-	return line
+	return &line
 }
 //
 //func GetLastPointOfLineOver(fromx, fromy, tox, toy, length int) (int, int) { // returns last Point of the line of fixed length which does not stop at (tox, toy)
