@@ -1,9 +1,12 @@
-package strict_definition_fov
+package optimized_strict_definition_fov
 
 // IMPLEMENTED IN GOLANG FROM http://www.roguebasin.com/index.php?title=LOS_using_strict_definition
+// Optimized by sidav
+// Optimization is not included in Strict Definition FOV because of different results!
 
 import (
 	"github.com/sidav/golibrl/geometry"
+	"github.com/sidav/golibrl/graphic_primitives"
 	"math"
 )
 
@@ -28,15 +31,10 @@ func emptyVisibilityMap(w, h int) {
 }
 
 func Fov(x, y, radius int) *[][]bool {
-	radius++
 	emptyVisibilityMap(len(*opaque), len((*opaque)[0]))
-	var i, j int
-	for i = -radius; i <= radius; i++ { //iterate out of map bounds as well (radius^1)
-		for j = -radius; j <= radius; j++ { //(radius^2)
-			if i*i+j*j < radius*radius {
-				los(x, y, x+i, y+j)
-			}
-		}
+	circle := graphic_primitives.GetApproxCircleAroundRect(x, y, 0, 0, radius)
+	for i := range *circle {
+		los(x, y, (*circle)[i].X, (*circle)[i].Y)
 	}
 	return visible
 }
@@ -66,9 +64,9 @@ func los(x0, y0, x1, y1 int) {
 	for xnext != x1 || ynext != y1 { //essentially casting a ray of length radius: (radius^3)
 
 		if geometry.AreCoordsInRect(xnext, ynext, 0, 0, mapw, maph) {
+			(*visible)[xnext][ynext] = true
 			if (*opaque)[xnext][ynext] { // or any equivalent
 				// tag_memorised(xnext, ynext); // make a note of the wall
-				(*visible)[xnext][ynext] = true
 				return
 			}
 		}

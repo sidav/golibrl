@@ -5,6 +5,7 @@ import (
 	"github.com/sidav/golibrl/console"
 	"github.com/sidav/golibrl/console_menu"
 	"github.com/sidav/golibrl/fov/basic_two_step_fov"
+	"github.com/sidav/golibrl/fov/optimized_strict_definition_fov"
 	"github.com/sidav/golibrl/fov/strict_definition_fov"
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
@@ -46,7 +47,7 @@ func testFOV() {
 	fovRadius := 15
 
 	w, h := console.GetConsoleSize()
-	cave := CA_cave.MakeCave(w, h, 3, 1)
+	cave := CA_cave.MakeCave(w, h, 3, -1)
 	//cave = fovTestMap
 	//w, h = len(*fovTestMap), len((*fovTestMap)[0])
 
@@ -108,14 +109,14 @@ func testFOV() {
 		case "ENTER":
 			// test-shmest
 			str := ""
-			for i:=1; i<=2;i++ {
+			for i:=1; i<=3;i++ {
 				name:=""
 				start := time.Now()
 				for j := 0; j < 10000; j++ {
 					_, name = getVisMapAndNameForAlgorithm(i, px, py, fovRadius, &opacityMap)
 				}
 				taken := time.Now().Sub(start) / time.Millisecond
-				str += fmt.Sprintf("%s:%d ms ", name, taken)
+				str += fmt.Sprintf("%s:%d ms; ", name, taken)
 			}
 			console_menu.ShowSimpleYNChoiceModalWindow(str)
 		default:
@@ -132,6 +133,10 @@ func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius int, opa
 		strict_definition_fov.SetOpacityMap(opacityMap)
 		visMap = strict_definition_fov.Fov(px, py, fovRadius)
 		currentFovAlgorithmName = "Strict Definition FOV"
+	case 2:
+		optimized_strict_definition_fov.SetOpacityMap(opacityMap)
+		visMap = optimized_strict_definition_fov.Fov(px, py, fovRadius)
+		currentFovAlgorithmName = "Optimized Strict Definition FOV"
 	default:
 		basic_two_step_fov.SetOpacityMap(opacityMap)
 		visMap = basic_two_step_fov.GetCircleVisibilityMap(px, py, fovRadius)
