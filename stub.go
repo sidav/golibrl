@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"github.com/sidav/golibrl/console"
+	"github.com/sidav/golibrl/console_menu"
 	"github.com/sidav/golibrl/fov/basic_two_step_fov"
 	"github.com/sidav/golibrl/fov/strict_definition_fov"
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
 	"strconv"
+	"time"
 )
 
 func main() {
@@ -40,7 +43,6 @@ var fovTestMap = &[]string{
 
 func testFOV() {
 	currentFovSelected := 1
-	currentFovAlgorithmName := "UNSELECTED"
 	fovRadius := 15
 
 	w, h := console.GetConsoleSize()
@@ -66,17 +68,7 @@ func testFOV() {
 	key := ""
 	for key != "ESCAPE" {
 		// getVisibilityMap
-		var visMap *[][]bool
-		switch currentFovSelected {
-		case 1:
-			strict_definition_fov.SetOpacityMap(&opacityMap)
-			visMap = strict_definition_fov.Fov(px, py, fovRadius)
-			currentFovAlgorithmName = "Strict Definition FOV"
-		default:
-			basic_two_step_fov.SetOpacityMap(&opacityMap)
-			visMap = basic_two_step_fov.GetCircleVisibilityMap(px, py, fovRadius)
-			currentFovAlgorithmName = "Two-step FOV"
-		}
+		visMap, currentFovAlgorithmName := getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius, &opacityMap)
 
 		// render map
 		for i := 0; i < len(*cave); i++ {
@@ -113,10 +105,39 @@ func testFOV() {
 			fovRadius--
 		case "+", "=":
 			fovRadius++
-		case "1", "2", "3":
+		case "ENTER":
+			// test-shmest
+			str := ""
+			for i:=1; i<=2;i++ {
+				name:=""
+				start := time.Now()
+				for j := 0; j < 10000; j++ {
+					_, name = getVisMapAndNameForAlgorithm(i, px, py, fovRadius, &opacityMap)
+				}
+				taken := time.Now().Sub(start) / time.Millisecond
+				str += fmt.Sprintf("%s:%d ms ", name, taken)
+			}
+			console_menu.ShowSimpleYNChoiceModalWindow(str)
+		default:
 			currentFovSelected, _ = strconv.Atoi(key)
 		}
 	}
+}
+
+func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius int, opacityMap *[][]bool) (*[][]bool, string) {
+	var visMap *[][]bool
+	currentFovAlgorithmName := "WTF FOV"
+	switch currentFovSelected {
+	case 1:
+		strict_definition_fov.SetOpacityMap(opacityMap)
+		visMap = strict_definition_fov.Fov(px, py, fovRadius)
+		currentFovAlgorithmName = "Strict Definition FOV"
+	default:
+		basic_two_step_fov.SetOpacityMap(opacityMap)
+		visMap = basic_two_step_fov.GetCircleVisibilityMap(px, py, fovRadius)
+		currentFovAlgorithmName = "Two-step FOV"
+	}
+	return visMap, currentFovAlgorithmName
 }
 
 func testCave() {
