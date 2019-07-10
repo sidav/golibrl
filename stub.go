@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/sidav/golibrl/console"
-	"github.com/sidav/golibrl/fov/basic_two_step_fov"
+	"github.com/sidav/golibrl/fov/strict_definition_fov"
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
 )
@@ -38,8 +38,10 @@ var fovTestMap = &[]string {
 
 func testFOV() {
 	w, h := console.GetConsoleSize()
-	cave := fovTestMap // CA_cave.MakeCave(w, h, 3, -1)
+	cave := CA_cave.MakeCave(w, h, 3, -1)
+	cave = fovTestMap
 	w, h = len(*fovTestMap), len((*fovTestMap)[0])
+
 	px, py := w/2, h/2
 
 	opacityMap := make([][]bool, w)
@@ -55,12 +57,12 @@ func testFOV() {
 		}
 	}
 
-	basic_two_step_fov.SetOpacityMap(&opacityMap)
+	strict_definition_fov.SetOpacityMap(&opacityMap)
 
 	key := ""
 	for key != "ESCAPE" {
 		// getVisibilityMap
-		visMap := basic_two_step_fov.GetCircleVisibilityMap(px, py, 15) // <--- CHANGE THIS LINE FOR TESTING OTHER FOV ALGORITHMS!
+		visMap := strict_definition_fov.Fov(px, py, 5) // <--- CHANGE THIS LINE FOR TESTING OTHER FOV ALGORITHMS!
 
 		// render map
 		for i := 0; i < len(*cave); i++ {
