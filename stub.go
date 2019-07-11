@@ -6,6 +6,7 @@ import (
 	"github.com/sidav/golibrl/fov/basic_bresenham_fov"
 	"github.com/sidav/golibrl/fov/basic_two_step_fov"
 	"github.com/sidav/golibrl/fov/optimized_strict_definition_fov"
+	"github.com/sidav/golibrl/fov/permissive_fov"
 	"github.com/sidav/golibrl/fov/strict_definition_fov"
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
@@ -132,6 +133,10 @@ func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius int, opa
 		basic_bresenham_fov.SetOpacityMap(opacityMap)
 		visMap = basic_bresenham_fov.GetCircleVisibilityMap(px, py, fovRadius)
 		currentFovAlgorithmName = "Bresenham FOV"
+	case 4:
+		permissive_fov.SetOpacityMap(opacityMap)
+		visMap = permissive_fov.Fov(px, py, fovRadius)
+		currentFovAlgorithmName = "Permissive FOV"
 	default:
 		basic_two_step_fov.SetOpacityMap(opacityMap)
 		visMap = basic_two_step_fov.GetCircleVisibilityMap(px, py, fovRadius)
