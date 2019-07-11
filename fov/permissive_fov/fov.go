@@ -57,7 +57,7 @@ func Fov(x, y, radius int) *[][]bool {
 }
 
 func computeQuadrant() {
-	const infinity = 1256// int(^uint32(0) >> 1)
+	var infinity = mapw+maph// int(^uint32(0) >> 1)
 	steepBumps := make([]bump, 0)
 	shallowBumps := make([]bump, 0)
 	activeFields := fieldList{}
@@ -76,9 +76,8 @@ func computeQuadrant() {
 		for j := startJ; j <= maxJ; j++ {
 			dest.x = i - j
 			dest.y = j
-			current = visitSquare(dest, current, &steepBumps, &shallowBumps, &activeFields)
+			visitSquare(dest, current, &steepBumps, &shallowBumps, &activeFields)
 		}
-		current = activeFields.first
 	}
 }
 
