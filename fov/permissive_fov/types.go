@@ -19,16 +19,19 @@ type field struct {
 type fieldList struct {
 	first *field
 	last *field
+	size int
 }
 
 func (fl *fieldList) addToEnd(f *field) {
 	f.prev = fl.last
 	fl.last = f
+	fl.size++
 }
 
 func (fl *fieldList) addToBeginning(f *field) {
 	f.next = fl.first
 	fl.first = f
+	fl.size++
 }
 
 func (fl *fieldList) remove(f *field) {
@@ -41,8 +44,9 @@ func (fl *fieldList) remove(f *field) {
 				fl.first = next
 			}
 			if next == nil {
-				fl.last = prev 
+				fl.last = prev
 			}
+			fl.size--
 			return
 		}
 		curr = curr.next

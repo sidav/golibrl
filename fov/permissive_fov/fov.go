@@ -1,5 +1,7 @@
 package permissive_fov
 
+import "github.com/sidav/golibrl/console"
+
 var (
 	mapw, maph, rangeLimit int
 	opaque                 *[][]bool
@@ -54,24 +56,27 @@ func computeQuadrant() {
 	const infinity = int(^uint32(0) >> 1)
 	steepBumps := make([]bump, 0)
 	shallowBumps := make([]bump, 0)
-	activeFields := make([]field, 0)
-	activeFields = append(activeFields, field{
+	activeFields := fieldList{}
+	activeFields.addToEnd(&field{
 		steep:   line{offset{1, 0}, offset{0, infinity}},
 		shallow: line{offset{0, 1}, offset{infinity, 0}},
 	})
 	dest := offset{}
 	actIsBlocked(dest)
-	for i := 1; i < infinity && len(activeFields) > 0; i++ {
-		current := &activeFields[0]
+	for i := 1; i < infinity && activeFields.size > 0; i++ {
+		current := activeFields.first
 		for j := 0; j <= i; j++ {
 			dest.x = i - j
 			dest.y = j
-			current = visitSquare(dest, current, steepBumps, shallowBumps, activeFields)
+			current = visitSquare(dest, current, steepBumps, shallowBumps, &activeFields)
 		}
 	}
 }
 
 func actIsBlocked(pos offset) bool {
+	console.PutString("actisblocked", 0, 0)
+	console.Flush_console()
+
 	if rangeLimit >= 0 && getDistance(max(pos.x, pos.y), min(pos.x, pos.y)) > rangeLimit {
 		return true
 	}
@@ -81,7 +86,10 @@ func actIsBlocked(pos offset) bool {
 	return (*opaque)[x][y]
 }
 
-func visitSquare(dest offset, currentField *field, steepBumps []bump, shallowBumps []bump, activeFields []field) *field {
+func visitSquare(dest offset, currentField *field, steepBumps []bump, shallowBumps []bump, activeFields *fieldList) *field {
+	console.PutString("visitsquare", 0, 0)
+	console.Flush_console()
+
 	topLeft := offset{dest.x, dest.y + 1}
 	bottomRight := offset{dest.x + 1, dest.y}
 	for currentField != nil && currentField.steep.isBelowOrContains(bottomRight) {
@@ -92,7 +100,7 @@ func visitSquare(dest offset, currentField *field, steepBumps []bump, shallowBum
 	}
 	if currentField.shallow.isAbove(bottomRight) && currentField.steep.isBelow(topLeft) {
 		next := currentField.next
-		// activeFields = remove(activeFields)
+		activeFields.remove(currentField)
 		return next
 	} else if currentField.shallow.isAbove(bottomRight) {
 		addShallowBump(topLeft, currentField, shallowBumps)
@@ -102,9 +110,9 @@ func visitSquare(dest offset, currentField *field, steepBumps []bump, shallowBum
 		return checkField(currentField, activeFields)
 	} else {
 		steeper := currentField
-		// shallower := activeFields.AddBefore(currentField, currentField)
-		// addSteepBump(bottomRight, shallower, steepBumps)
-		// checkField(shallower, activeFields)
+		shallower := currentField // activeFields.addToBeginning(currentField)
+		addSteepBump(bottomRight, shallower, steepBumps)
+		checkField(shallower, activeFields)
 		addShallowBump(topLeft, steeper, shallowBumps)
 		return checkField(steeper, activeFields)
 	}
@@ -112,6 +120,9 @@ func visitSquare(dest offset, currentField *field, steepBumps []bump, shallowBum
 }
 
 func addShallowBump(point offset, currentField *field, shallowBumps []bump) {
+	console.PutString("addshallowbump", 0, 0)
+	console.Flush_console()
+
 	value := currentField
 	value.shallow.far = point
 	value.shallowBump = &bump{value.shallowBump, point}
@@ -128,6 +139,9 @@ func addShallowBump(point offset, currentField *field, shallowBumps []bump) {
 }
 
 func addSteepBump(point offset, currentField *field, steepBumps []bump) {
+	console.PutString("addsteepbump", 0, 0)
+	console.Flush_console()
+
 	value := currentField
 	value.steep.far = point
 	value.steepBump = &bump{location: point, parent: value.steepBump}
@@ -140,13 +154,15 @@ func addSteepBump(point offset, currentField *field, steepBumps []bump) {
 	currentField = value
 }
 
-func checkField(currentField *field, activeFields []field) *field {
+func checkField(currentField *field, activeFields *fieldList) *field {
+	console.PutString("checkField", 0, 0)
+	console.Flush_console()
 	result := currentField
 	if currentField.shallow.doesContain(currentField.steep.near) &&
 		currentField.shallow.doesContain(currentField.steep.far) &&
 		(currentField.shallow.doesContain(offset{0, 1}) || currentField.shallow.doesContain(offset{1, 0})) {
 		result = currentField.next
-		// activeFields.Remove(currentField)
+		activeFields.remove(currentField)
 	}
 	return result
 }
