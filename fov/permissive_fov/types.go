@@ -45,6 +45,7 @@ func (fldlist *fieldList) addBefore(f1 *field, f2 field) *field {
 			}
 			f2.next = f1
 			f2.prev = prev
+			curr.prev = &f2
 			fldlist.size++
 			if f1 == &f2 {
 				panic("AddBefore has seen some strange shit.")

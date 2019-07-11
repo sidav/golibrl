@@ -168,7 +168,6 @@ func checkField(currentField *field, activeFields *fieldList) *field {
 // TODO: delete the following
 var imprint = 0
 func immediateprint(msg string){
-	return
 	console.PutString(fmt.Sprintf("%s - %d", msg, imprint), 0, 0)
 	console.Flush_console()
 	imprint++
