@@ -146,7 +146,7 @@ func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius int, opa
 }
 
 func fovAlgsPerfomanceCheck(px, py, w, h, fovRadius int, opacityMap *[][]bool) {
-	const totalAlgs = 4
+	const totalAlgs = 5
 	const MillisecondsToTest = 1000
 	console.SetBgColor(console.DARK_GRAY)
 	console.SetFgColor(console.BLACK)

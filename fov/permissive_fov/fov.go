@@ -1,6 +1,10 @@
 package permissive_fov
 
-import "github.com/sidav/golibrl/console"
+import (
+	"fmt"
+	"github.com/sidav/golibrl/console"
+	"github.com/sidav/golibrl/geometry"
+)
 
 var (
 	mapw, maph, rangeLimit int
@@ -53,43 +57,45 @@ func Fov(x, y, radius int) *[][]bool {
 }
 
 func computeQuadrant() {
-	const infinity = int(^uint32(0) >> 1)
+	const infinity = 1256// int(^uint32(0) >> 1)
 	steepBumps := make([]bump, 0)
 	shallowBumps := make([]bump, 0)
 	activeFields := fieldList{}
 	activeFields.addToEnd(&field{
-		steep:   line{offset{1, 0}, offset{0, infinity}},
-		shallow: line{offset{0, 1}, offset{infinity, 0}},
+		steep:   line{offset{1, 0}, offset{0, maph}},
+		shallow: line{offset{0, 1}, offset{mapw, 0}},
 	})
 	dest := offset{}
-	actIsBlocked(dest)
+	if quadrant.x == 1 && quadrant.y == 1 {
+		actIsBlocked(dest)
+	}
 	for i := 1; i < infinity && activeFields.size > 0; i++ {
+		startJ := max(0, i - mapw)
+		maxJ := min(i, maph)
 		current := activeFields.first
-		for j := 0; j <= i; j++ {
+		for j := startJ; j <= maxJ; j++ {
 			dest.x = i - j
 			dest.y = j
-			current = visitSquare(dest, current, steepBumps, shallowBumps, &activeFields)
+			current = visitSquare(dest, current, &steepBumps, &shallowBumps, &activeFields)
 		}
+		current = activeFields.first
 	}
 }
 
 func actIsBlocked(pos offset) bool {
-	console.PutString("actisblocked", 0, 0)
-	console.Flush_console()
-
-	if rangeLimit >= 0 && getDistance(max(pos.x, pos.y), min(pos.x, pos.y)) > rangeLimit {
+	if rangeLimit >= 0 && !geometry.AreCoordsInRange(pos.x, pos.y, 0, 0, rangeLimit) {
 		return true
 	}
 	x := pos.x*quadrant.x + source.x
 	y := pos.y*quadrant.y + source.y
-	(*visible)[x][y] = true
-	return (*opaque)[x][y]
+	if geometry.AreCoordsInRect(x, y, 0, 0, mapw, maph) {
+		(*visible)[x][y] = true
+		return (*opaque)[x][y]
+	}
+	return true
 }
 
-func visitSquare(dest offset, currentField *field, steepBumps []bump, shallowBumps []bump, activeFields *fieldList) *field {
-	console.PutString("visitsquare", 0, 0)
-	console.Flush_console()
-
+func visitSquare(dest offset, currentField *field, steepBumps *[]bump, shallowBumps *[]bump, activeFields *fieldList) *field {
 	topLeft := offset{dest.x, dest.y + 1}
 	bottomRight := offset{dest.x + 1, dest.y}
 	for currentField != nil && currentField.steep.isBelowOrContains(bottomRight) {
@@ -110,23 +116,19 @@ func visitSquare(dest offset, currentField *field, steepBumps []bump, shallowBum
 		return checkField(currentField, activeFields)
 	} else {
 		steeper := currentField
-		shallower := currentField // activeFields.addToBeginning(currentField)
+		shallower := activeFields.addBefore(currentField, *currentField)
 		addSteepBump(bottomRight, shallower, steepBumps)
 		checkField(shallower, activeFields)
 		addShallowBump(topLeft, steeper, shallowBumps)
 		return checkField(steeper, activeFields)
 	}
-	return nil
 }
 
-func addShallowBump(point offset, currentField *field, shallowBumps []bump) {
-	console.PutString("addshallowbump", 0, 0)
-	console.Flush_console()
-
-	value := currentField
+func addShallowBump(point offset, currentField *field, shallowBumps *[]bump) {
+	value := *currentField
 	value.shallow.far = point
 	value.shallowBump = &bump{value.shallowBump, point}
-	shallowBumps = append(shallowBumps, *(value.shallowBump))
+	*shallowBumps = append(*shallowBumps, *(value.shallowBump))
 
 	currentBump := value.steepBump
 	for currentBump != nil {
@@ -135,28 +137,23 @@ func addShallowBump(point offset, currentField *field, shallowBumps []bump) {
 		}
 		currentBump = currentBump.parent
 	}
-	currentField = value
+	*currentField = value
 }
 
-func addSteepBump(point offset, currentField *field, steepBumps []bump) {
-	console.PutString("addsteepbump", 0, 0)
-	console.Flush_console()
-
-	value := currentField
+func addSteepBump(point offset, currentField *field, steepBumps *[]bump) {
+	value := *currentField
 	value.steep.far = point
 	value.steepBump = &bump{location: point, parent: value.steepBump}
-	steepBumps = append(steepBumps, *value.steepBump)
+	*steepBumps = append(*steepBumps, *(value.steepBump))
 	for currentBump := value.shallowBump; currentBump != nil; currentBump = currentBump.parent {
 		if value.steep.isBelow(currentBump.location) {
 			value.steep.near = currentBump.location
 		}
 	}
-	currentField = value
+	*currentField = value
 }
 
 func checkField(currentField *field, activeFields *fieldList) *field {
-	console.PutString("checkField", 0, 0)
-	console.Flush_console()
 	result := currentField
 	if currentField.shallow.doesContain(currentField.steep.near) &&
 		currentField.shallow.doesContain(currentField.steep.far) &&
@@ -165,4 +162,17 @@ func checkField(currentField *field, activeFields *fieldList) *field {
 		activeFields.remove(currentField)
 	}
 	return result
+}
+
+
+// TODO: delete the following
+var imprint = 0
+func immediateprint(msg string){
+	return
+	console.PutString(fmt.Sprintf("%s - %d", msg, imprint), 0, 0)
+	console.Flush_console()
+	imprint++
+	if imprint > 50000 {
+		panic("Endless loop. I'd better crash.")
+	}
 }

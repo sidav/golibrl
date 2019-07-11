@@ -23,15 +23,38 @@ type fieldList struct {
 }
 
 func (fl *fieldList) addToEnd(f *field) {
+	immediateprint("ADDING TO END")
 	f.prev = fl.last
+	if fl.last != nil {
+		fl.last.next = f
+	} else {
+		fl.first = f
+	}
 	fl.last = f
 	fl.size++
 }
 
-func (fl *fieldList) addToBeginning(f *field) {
-	f.next = fl.first
-	fl.first = f
-	fl.size++
+func (fldlist *fieldList) addBefore(f1 *field, f2 field) *field {
+	immediateprint("ADDING BEFORE")
+	curr := fldlist.first
+	for curr != nil {
+		if curr == f1 {
+			prev := curr.prev
+			if prev == nil {
+				fldlist.first = &f2
+			}
+			f2.next = f1
+			f2.prev = prev
+			fldlist.size++
+			if f1 == &f2 {
+				panic("AddBefore has seen some strange shit.")
+			}
+			return &f2
+		}
+		curr = curr.next
+	}
+	panic("AddBefore has crashed.")
+	return nil
 }
 
 func (fl *fieldList) remove(f *field) {
