@@ -76,7 +76,7 @@ func computeQuadrant() {
 		for j := startJ; j <= maxJ; j++ {
 			dest.x = i - j
 			dest.y = j
-			visitSquare(dest, current, &steepBumps, &shallowBumps, &activeFields)
+			current = visitSquare(dest, current, &steepBumps, &shallowBumps, &activeFields)
 		}
 	}
 }
@@ -91,29 +91,65 @@ func actIsBlocked(pos offset) bool {
 		(*visible)[x][y] = true
 		return (*opaque)[x][y]
 	}
-	return true
+	return true // squares out of bounds of the opacity map are considered opaque.
 }
 
 func visitSquare(dest offset, currentField *field, steepBumps *[]bump, shallowBumps *[]bump, activeFields *fieldList) *field {
 	topLeft := offset{dest.x, dest.y + 1}
 	bottomRight := offset{dest.x + 1, dest.y}
+
 	for currentField != nil && currentField.steep.isBelowOrContains(bottomRight) {
+		// case ABOVE
+		// The square is in case 'above'. This means that it is ignored
+		// for the currentField. But the steeper fields might need it.
 		currentField = currentField.next
 	}
-	if currentField == nil || currentField.shallow.isAboveOrContains(topLeft) || !actIsBlocked(dest) {
+
+	if currentField == nil {
+		// The square was in case 'above' for all fields. This means that
+		// we no longer care about it or any squares in its diagonal rank.
 		return currentField
 	}
-	if currentField.shallow.isAbove(bottomRight) && currentField.steep.isBelow(topLeft) {
+
+	if currentField.shallow.isAboveOrContains(topLeft) {
+		// case BELOW
+		// The shallow line is above the extremity of the square, so that
+		// square is ignored.
+		return currentField
+	}
+
+	// The square is between the lines in some way. This means that we
+	// need to visit it and determine whether it is blocked.
+
+	if !actIsBlocked(dest) {
+		// We don't care what case might be left, because this square does
+		// not obstruct.
+		return currentField
+	}
+
+	if currentField.shallow.isAbove(bottomRight) &&
+		currentField.steep.isBelow(topLeft) {
+		// case BLOCKING
+		// Both lines intersect the square. This current field has ended.
 		next := currentField.next
 		activeFields.remove(currentField)
 		return next
+
 	} else if currentField.shallow.isAbove(bottomRight) {
+		// case SHALLOW BUMP
+		// The square intersects only the shallow line.
 		addShallowBump(topLeft, currentField, shallowBumps)
 		return checkField(currentField, activeFields)
+
 	} else if currentField.steep.isBelow(topLeft) {
+		// case STEEP BUMP
+		// The square intersects only the steep line.
 		addSteepBump(bottomRight, currentField, steepBumps)
 		return checkField(currentField, activeFields)
+
 	} else {
+		// case BETWEEN
+		// The square intersects neither line. We need to split into two fields.
 		steeper := currentField
 		shallower := activeFields.addBefore(currentField, *currentField)
 		addSteepBump(bottomRight, shallower, steepBumps)
