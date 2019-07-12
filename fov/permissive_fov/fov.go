@@ -131,9 +131,7 @@ func visitSquare(dest offset, currentField *field, steepBumps *[]*bump, shallowB
 		currentField.steep.isBelow(topLeft) {
 		// case BLOCKING
 		// Both lines intersect the square. This current field has ended.
-		next := currentField.next
-		activeFields.remove(currentField)
-		return next
+		return activeFields.remove(currentField)
 
 	} else if currentField.shallow.isAbove(bottomRight) {
 		// case SHALLOW BUMP

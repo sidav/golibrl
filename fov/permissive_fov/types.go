@@ -23,7 +23,6 @@ type fieldList struct {
 }
 
 func (fl *fieldList) addToEnd(f *field) {
-	immediateprint("ADDING TO END")
 	f.prev = fl.last
 	if fl.last != nil {
 		fl.last.next = f
@@ -35,7 +34,6 @@ func (fl *fieldList) addToEnd(f *field) {
 }
 
 func (fldlist *fieldList) addBefore(f1 *field, f2 field) *field {
-	immediateprint("ADDING BEFORE")
 	curr := fldlist.first
 	for curr != nil {
 		if curr == f1 {
@@ -58,7 +56,7 @@ func (fldlist *fieldList) addBefore(f1 *field, f2 field) *field {
 	return nil
 }
 
-func (fl *fieldList) remove(f *field) {
+func (fl *fieldList) remove(f *field) *field {
 	curr := fl.first
 	for curr != nil {
 		if curr == f {
@@ -71,10 +69,11 @@ func (fl *fieldList) remove(f *field) {
 				fl.last = prev
 			}
 			fl.size--
-			return
+			return f.next
 		}
 		curr = curr.next
 	}
+	return nil
 }
 
 type line struct {
