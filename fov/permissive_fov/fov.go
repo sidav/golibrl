@@ -58,8 +58,8 @@ func Fov(x, y, radius int) *[][]bool {
 
 func computeQuadrant() {
 	var infinity = mapw+maph// int(^uint32(0) >> 1)
-	steepBumps := make([]bump, 0)
-	shallowBumps := make([]bump, 0)
+	steepBumps := make([]*bump, 0)
+	shallowBumps := make([]*bump, 0)
 	activeFields := fieldList{}
 	activeFields.addToEnd(&field{
 		steep:   line{offset{1, 0}, offset{0, maph}},
@@ -94,7 +94,7 @@ func actIsBlocked(pos offset) bool {
 	return true // squares out of bounds of the opacity map are considered opaque.
 }
 
-func visitSquare(dest offset, currentField *field, steepBumps *[]bump, shallowBumps *[]bump, activeFields *fieldList) *field {
+func visitSquare(dest offset, currentField *field, steepBumps *[]*bump, shallowBumps *[]*bump, activeFields *fieldList) *field {
 	topLeft := offset{dest.x, dest.y + 1}
 	bottomRight := offset{dest.x + 1, dest.y}
 
@@ -159,33 +159,41 @@ func visitSquare(dest offset, currentField *field, steepBumps *[]bump, shallowBu
 	}
 }
 
-func addShallowBump(point offset, currentField *field, shallowBumps *[]bump) {
-	value := *currentField
-	value.shallow.far = point
-	value.shallowBump = &bump{value.shallowBump, point}
-	*shallowBumps = append(*shallowBumps, *(value.shallowBump))
-
-	currentBump := value.steepBump
+func addShallowBump(point offset, currentField *field, shallowBumps *[]*bump) {
+	// First, the far point of shallow is set to the new point.
+	currentField.shallow.far = point
+	// Second, we need to add the new bump to the shallow bump list for
+	// future steep bump handling.
+	newBump := bump{location: point, parent: currentField.shallowBump}
+	*shallowBumps = append(*shallowBumps, &newBump)
+	currentField.shallowBump = &newBump
+	// Now we have too look through the list of steep bumps and see if
+	// any of them are below the line.
+	// If there are, we need to replace near point too.
+	currentBump := currentField.steepBump
 	for currentBump != nil {
-		if value.shallow.isAbove(currentBump.location) {
-			value.shallow.near = currentBump.location
+		if currentField.shallow.isAbove(currentBump.location) {
+			currentField.shallow.near = currentBump.location
 		}
 		currentBump = currentBump.parent
 	}
-	*currentField = value
 }
 
-func addSteepBump(point offset, currentField *field, steepBumps *[]bump) {
-	value := *currentField
-	value.steep.far = point
-	value.steepBump = &bump{location: point, parent: value.steepBump}
-	*steepBumps = append(*steepBumps, *(value.steepBump))
-	for currentBump := value.shallowBump; currentBump != nil; currentBump = currentBump.parent {
-		if value.steep.isBelow(currentBump.location) {
-			value.steep.near = currentBump.location
+func addSteepBump(point offset, currentField *field, steepBumps *[]*bump) {
+	currentField.steep.far = point
+	newBump := bump{location: point, parent: currentField.steepBump}
+	*steepBumps = append(*steepBumps, &newBump)
+	currentField.steepBump = &newBump
+
+	// Now look through the list of shallow bumps and see if any of them
+	// are below the line.
+	currBump := currentField.shallowBump
+	for currBump != nil {
+		if currentField.steep.isBelow(currBump.location) {
+			currentField.steep.near = currBump.location
 		}
+		currBump = currBump.parent
 	}
-	*currentField = value
 }
 
 func checkField(currentField *field, activeFields *fieldList) *field {
