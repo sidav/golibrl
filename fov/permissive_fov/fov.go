@@ -190,6 +190,8 @@ func addSteepBump(point offset, currentField *field, steepBumps *[]bump) {
 
 func checkField(currentField *field, activeFields *fieldList) *field {
 	result := currentField
+	// If the two slopes are colinear, and if they pass through either
+	// extremity, remove the field of view.
 	if currentField.shallow.doesContain(currentField.steep.near) &&
 		currentField.shallow.doesContain(currentField.steep.far) &&
 		(currentField.shallow.doesContain(offset{0, 1}) || currentField.shallow.doesContain(offset{1, 0})) {
