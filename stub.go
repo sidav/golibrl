@@ -5,6 +5,7 @@ import (
 	"github.com/sidav/golibrl/console"
 	"github.com/sidav/golibrl/fov/basic_bresenham_fov"
 	"github.com/sidav/golibrl/fov/basic_two_step_fov"
+	"github.com/sidav/golibrl/fov/mill_fov"
 	"github.com/sidav/golibrl/fov/optimized_strict_definition_fov"
 	"github.com/sidav/golibrl/fov/permissive_fov"
 	"github.com/sidav/golibrl/fov/strict_definition_fov"
@@ -137,6 +138,10 @@ func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius int, opa
 		permissive_fov.SetOpacityMap(opacityMap)
 		visMap = permissive_fov.Fov(px, py, fovRadius)
 		currentFovAlgorithmName = "Permissive FOV"
+	case 5:
+		mill_fov.SetOpacityMap(opacityMap)
+		visMap = mill_fov.Fov(px, py, fovRadius)
+		currentFovAlgorithmName = "Mill FOV"
 	default:
 		basic_two_step_fov.SetOpacityMap(opacityMap)
 		visMap = basic_two_step_fov.GetCircleVisibilityMap(px, py, fovRadius)
@@ -146,7 +151,7 @@ func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius int, opa
 }
 
 func fovAlgsPerfomanceCheck(px, py, w, h, fovRadius int, opacityMap *[][]bool) {
-	const totalAlgs = 5
+	const totalAlgs = 6
 	const MillisecondsToTest = 1000
 	console.SetBgColor(console.DARK_GRAY)
 	console.SetFgColor(console.BLACK)
