@@ -113,12 +113,17 @@ func computeOctant(octant byte, fx, fy, rangeLimit, x int, top, bottom *slope) {
 					}
 					wasOpaque = 1
 				} else {
-					if wasOpaque > 0 {
+					if wasOpaque > 0 { // if we found a transition from opaque to clear, adjust the top vector downwards
+						// if the opaque tile has a beveled bottom-right corner, move the top vector down to the bottom center.
+						// otherwise, move it down to the bottom right. the corner is beveled if the tiles below and to the right
+						// are clear. we know the tile below is clear because that's the current tile, so just check to the right
 						nx := x*2
-						ny := y*2 + 1
-						if blocksLight(x+1, y+1, octant, fx, fy) {
+						ny := y*2 + 1 // the bottom of the opaque tile (oy*2-1) equals the top of this tile (y*2+1)
+						// NOTE: if you're using full symmetry and want more expansive walls (recommended), comment out the next condition
+						if blocksLight(x+1, y+1, octant, fx, fy) { // check the right of the opaque tile (y+1), not this one
 							nx++
 						}
+						// we have to maintain the invariant that top > bottom. if not, the sector is empty and we're done
 						if bottom.GreaterOrEqual(ny, nx) {
 							return
 						}
@@ -128,9 +133,14 @@ func computeOctant(octant byte, fx, fy, rangeLimit, x int, top, bottom *slope) {
 				}
 			}
 
-			// TO HERE
 			}
 		}
+
+		// if the column didn't end in a clear tile, then there's no reason to continue processing the current sector
+		// because that means either 1) wasOpaque == -1, implying that the sector is empty or at its range limit, or 2)
+		// wasOpaque == 1, implying that we found a transition from clear to opaque and we recursed and we never found
+		// a transition back to clear, so there's nothing else for us to do that the recursive method hasn't already. (if
+		// we didn't recurse (because y == bottomY), it would have executed a break, leaving wasOpaque equal to 0.)
 		if wasOpaque != 0 {
 			break
 		}
