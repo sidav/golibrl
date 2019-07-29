@@ -50,7 +50,7 @@ func testFOV() {
 	fovRadius := 15
 
 	w, h := console.GetConsoleSize()
-	cave := CA_cave.MakeCave(w, h, 3, -1)
+	cave := CA_cave.MakeCave(w, h, 40, 3, -1)
 	//cave = fovTestMap
 	//w, h = len(*fovTestMap), len((*fovTestMap)[0])
 
@@ -181,7 +181,8 @@ func fovAlgsPerfomanceCheck(px, py, w, h, fovRadius int, opacityMap *[][]bool) {
 }
 
 func testCave() {
-	cave := CA_cave.MakeCave(60, 20, 3, -1)
+	w, h := console.GetConsoleSize()
+	cave := CA_cave.MakeCave(w, h, 40, 4, -1)
 	console.SetFgColor(console.WHITE)
 	for i := 0; i < len(*cave); i++ {
 		str := ' '
