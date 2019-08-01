@@ -12,20 +12,20 @@ type FibRandom struct {
 	biggerLag, smallerLag int // should be > 0
 }
 
-func (f *FibRandom) lcg() int { // used for initial values setup
-	f.lcgX = (f.lcgX*2416 + 374441) % 1771875
-	return f.lcgX
+func (rnd *FibRandom) lcg() int { // used for initial values setup
+	rnd.lcgX = (rnd.lcgX*2416 + 374441) % 1771875
+	return rnd.lcgX
 }
 
-func (f *FibRandom) InitDefault() {
-	f.InitCustom(-1, 17, 5)
+func (rnd *FibRandom) InitDefault() {
+	rnd.InitCustom(-1, 17, 5)
 }
 
-func (f *FibRandom) InitBySeed(seed int) {
-	f.InitCustom(seed, 17, 5)
+func (rnd *FibRandom) InitBySeed(seed int) {
+	rnd.InitCustom(seed, 17, 5)
 }
 
-func (f *FibRandom) InitCustom(seed, lagA, lagB int) {
+func (rnd *FibRandom) InitCustom(seed, lagA, lagB int) {
 	if seed < 0 {
 		seed = int(time.Duration(time.Now().UnixNano())/time.Millisecond) % mod
 	}
@@ -37,35 +37,77 @@ func (f *FibRandom) InitCustom(seed, lagA, lagB int) {
 	if lagB <= 0 || lagB == lagA {
 		panic("FibRand lag params should be > 0 and not equal!")
 	}
-	f.lcgX = seed
-	f.biggerLag = lagA
-	f.smallerLag = lagB
-	f.curValues = make([]int, 0)
-	for i := 0; i < f.biggerLag; i++ {
-		newval := f.lcg() % mod
-		f.curValues = append(f.curValues, newval)
+	rnd.lcgX = seed
+	rnd.biggerLag = lagA
+	rnd.smallerLag = lagB
+	rnd.curValues = make([]int, 0)
+	for i := 0; i < rnd.biggerLag; i++ {
+		newval := rnd.lcg() % mod
+		rnd.curValues = append(rnd.curValues, newval)
 	}
 }
 
-func (f *FibRandom) Rand(modulo int) int {
-	aIndex := f.currIndex
-	bIndex := f.currIndex - f.smallerLag
+func (rnd *FibRandom) Rand(modulo int) int {
+	aIndex := rnd.currIndex
+	bIndex := rnd.currIndex - rnd.smallerLag
 	if bIndex < 0 {
-		bIndex += f.biggerLag
+		bIndex += rnd.biggerLag
 	}
-	b := f.curValues[bIndex]
-	a := f.curValues[aIndex]
+	b := rnd.curValues[bIndex]
+	a := rnd.curValues[aIndex]
 	new := a + b
 	if new >= mod {
 		new -= mod
 	}
-	f.curValues[f.currIndex] = new
-	f.currIndex++
-	if f.currIndex >= len(f.curValues) {
-		f.currIndex = 0
+	rnd.curValues[rnd.currIndex] = new
+	rnd.currIndex++
+	if rnd.currIndex >= len(rnd.curValues) {
+		rnd.currIndex = 0
 	}
 	if modulo > 0 {
 		return new % modulo
 	}
 	return new
 }
+
+func (rnd *FibRandom) RollDice(dnum, dval, dmod int) int {
+	var result int
+	for i := 0; i < dnum; i++ {
+		result += rnd.Rand(dval) + 1
+	}
+	return result + dmod
+}
+
+func (rnd *FibRandom) RandomUnitVectorInt() (int, int) {
+	var vx, vy int
+	for vx == 0 && vy == 0 {
+		vx, vy = rnd.Rand(3)-1, rnd.Rand(3)-1
+	}
+	return vx, vy
+}
+
+func (rnd *FibRandom) RandInRange(from, to int) int { //should be inclusive
+	if to < from {
+		t := from
+		from = to
+		to = t
+	}
+	if from == to {
+		return from
+	}
+	return rnd.Rand(to-from+1) + from
+}
+
+func (rnd *FibRandom) RandomPercent() int {
+	return rnd.Rand(100)
+}
+
+func (rnd *FibRandom) RandomCoordsInRangeFrom(x, y, r int) (int, int) {
+	rx, ry := x+3*r, y+3*r
+	for (rx-x)*(rx-x)+(ry-y)*(ry-y) > r*r {
+		rx = rnd.RandInRange(x-r-1, x+r+1)
+		ry = rnd.RandInRange(y-r-1, y+r+1)
+	}
+	return rx, ry
+}
+
