@@ -21,9 +21,10 @@ func main() {
 	defer console.Close_console()
 	key := ""
 	for key != "ESCAPE" {
+		angletest()
 		// testFractalLandscape()
 		// testCave()
-		testFOV()
+		// testFOV()
 		console.Flush_console()
 		key = console.ReadKey()
 	}
