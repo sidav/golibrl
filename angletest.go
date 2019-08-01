@@ -38,13 +38,13 @@ func angletest() {
 	w, h := cw.GetConsoleSize()
 	cx, cy := w/2, h/2
 	vx, vy := 1, 0
-	angle := 10
+	angle := 170
 	key := ""
 	for key != "ESCAPE" {
 		cw.Clear_console()
 		for i := 0; i < w; i++ {
 			for j := 0; j < h; j++ {
-				if geometry.AreCoordsInSector(cx, cy, vx, vy, i, j, angle) {
+				if geometry.AreCoordsInSector(i, j, cx, cy, vx, vy, angle) {
 					cw.PutChar('+', i, j)
 				}
 			}
@@ -55,7 +55,8 @@ func angletest() {
 		switch key {
 		case ".": angle++
 		case ",": angle--
+		default:
+			vx, vy = KeyToDirection(key, true)
 		}
-		vx, vy = KeyToDirection(key, true)
 	}
 }

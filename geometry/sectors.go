@@ -1,20 +1,33 @@
 package geometry
 
-import "math"
+import (
+	"math"
+)
 
-func AreCoordsInSector(fromX, fromY, lookX, lookY, targetX, targetY, sectorAngle int) bool {
-	if fromX == targetX && fromY == targetY {
+func AreCoordsInSector(x, y, sectorOriginX, sectorOriginY, sectorDirX, sectorDirY, sectorAngle int) bool {
+	inverse := false
+	if sectorOriginX == x && sectorOriginY == y {
 		return true
 	}
-	if sectorAngle > 180 { // doesn't work
-		return !AreCoordsInSector(fromX, fromY, lookX, lookY, targetX, targetY, 360 - sectorAngle)
+	if sectorAngle > 180 {
+		if sectorAngle >= 360 {
+			return true
+		}
+		sectorAngle = 360 - sectorAngle
+		inverse = true
+		sectorDirX = -sectorDirX
+		sectorDirY = -sectorDirY
 	}
-	halfSectorAngle := math.Pi * (float64(sectorAngle) / 2) / 180  // in radians
-	centX, centY := targetX-fromX, targetY-fromY
-	sectorCenterAngle := math.Atan2(float64(lookY), float64(lookX))
+	halfSectorAngle := math.Pi * (float64(sectorAngle) / 2) / 180 // in radians
+	centX, centY := x-sectorOriginX, y-sectorOriginY
+	sectorCenterAngle := math.Atan2(float64(sectorDirY), float64(sectorDirX))
 	angleToCoords := math.Atan2(float64(centY), float64(centX))
-	if centX < 0 && centY < 0 && lookY >= 0 {
+	if centX < 0 && centY < 0 && sectorDirY >= 0 {
 		angleToCoords += 2 * math.Pi
 	}
-	return sectorCenterAngle - halfSectorAngle <= angleToCoords && sectorCenterAngle + halfSectorAngle >= angleToCoords
+	liesWithin := sectorCenterAngle-halfSectorAngle <= angleToCoords && sectorCenterAngle+halfSectorAngle >= angleToCoords
+	if inverse {
+		return !liesWithin
+	}
+	return liesWithin
 }
