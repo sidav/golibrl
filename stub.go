@@ -21,10 +21,10 @@ func main() {
 	defer console.Close_console()
 	key := ""
 	for key != "ESCAPE" {
-		angletest()
+		// angletest()
 		// testFractalLandscape()
 		// testCave()
-		// testFOV()
+		testFOV()
 		console.Flush_console()
 		key = console.ReadKey()
 	}
@@ -51,7 +51,7 @@ func testFOV() {
 	fovRadius := 15
 
 	w, h := console.GetConsoleSize()
-	cave := CA_cave.MakeCave(w, h, 40, 3, -1)
+	cave := CA_cave.MakeCave(w, h, 40, 3, 25)
 	//cave = fovTestMap
 	//w, h = len(*fovTestMap), len((*fovTestMap)[0])
 

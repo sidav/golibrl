@@ -37,9 +37,11 @@ func (fldlist *fieldList) addBefore(f1 *field, f2 field) *field {
 	curr := fldlist.first
 	for curr != nil {
 		if curr == f1 {
-			prev := curr.prev
+			prev := f1.prev
 			if prev == nil {
 				fldlist.first = &f2
+			} else {
+				prev.next = &f2
 			}
 			f2.next = f1
 			f2.prev = prev
@@ -64,9 +66,13 @@ func (fl *fieldList) remove(f *field) *field {
 			next := curr.next
 			if prev == nil {
 				fl.first = next
+			} else {
+				prev.next = next
 			}
 			if next == nil {
 				fl.last = prev
+			} else {
+				next.prev = prev
 			}
 			fl.size--
 			return f.next
