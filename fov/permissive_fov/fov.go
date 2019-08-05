@@ -6,17 +6,13 @@ import (
 	"github.com/sidav/golibrl/geometry"
 )
 
+type opacityFunction func(int, int) bool
+
 var (
 	mapw, maph, rangeLimit int
-	opaque                 *[][]bool
 	visible                *[][]bool
+	opaque                 opacityFunction
 )
-
-func SetOpacityMap(o *[][]bool) {
-	opaque = o
-	mapw = len(*opaque)
-	maph = len((*opaque)[0])
-}
 
 func emptyVisibilityMap(w, h int) {
 	vis := make([][]bool, w)
@@ -32,7 +28,9 @@ var (
 	quadrant, source offset
 )
 
-func GetFovMapFrom(x, y, radius int) *[][]bool {
+func GetFovMapFrom(x, y, radius, mapW, mapH int, opFunc opacityFunction) *[][]bool {
+	mapw, maph = mapW, mapH
+	opaque = opFunc
 	source = offset{x, y}
 	rangeLimit = radius
 	emptyVisibilityMap(mapw, maph)
@@ -57,7 +55,7 @@ func GetFovMapFrom(x, y, radius int) *[][]bool {
 }
 
 func computeQuadrant() {
-	var infinity = mapw+maph// int(^uint32(0) >> 1)
+	var infinity = mapw + maph // int(^uint32(0) >> 1)
 	steepBumps := make([]*bump, 0)
 	shallowBumps := make([]*bump, 0)
 	activeFields := fieldList{}
@@ -70,7 +68,7 @@ func computeQuadrant() {
 		actIsBlocked(dest)
 	}
 	for i := 1; i < infinity && activeFields.size > 0; i++ {
-		startJ := max(0, i - mapw)
+		startJ := max(0, i-mapw)
 		maxJ := min(i, maph)
 		current := activeFields.first
 		for j := startJ; j <= maxJ; j++ {
@@ -89,7 +87,7 @@ func actIsBlocked(pos offset) bool {
 	y := pos.y*quadrant.y + source.y
 	if geometry.AreCoordsInRect(x, y, 0, 0, mapw, maph) {
 		(*visible)[x][y] = true
-		return (*opaque)[x][y]
+		return opaque(x, y)
 	}
 	return true // squares out of bounds of the opacity map are considered opaque.
 }
@@ -207,10 +205,10 @@ func checkField(currentField *field, activeFields *fieldList) *field {
 	return result
 }
 
-
 // TODO: delete the following
 var imprint = 0
-func immediateprint(msg string){
+
+func immediateprint(msg string) {
 	console.PutString(fmt.Sprintf("%s - %d", msg, imprint), 0, 0)
 	console.Flush_console()
 	imprint++

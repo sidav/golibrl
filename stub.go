@@ -46,12 +46,18 @@ var fovTestMap = &[]string{
 	"#.#........",
 }
 
+var cave *[]string
+
+func opacityFunc(x, y int) bool {
+	return rune((*cave)[x][y]) == '#'
+}
+
 func testFOV() {
 	currentFovSelected := 1
 	fovRadius := 15
 
 	w, h := console.GetConsoleSize()
-	cave := CA_cave.MakeCave(w, h, 40, 3, 25)
+	cave = CA_cave.MakeCave(w, h, 40, 3, 25)
 	//cave = fovTestMap
 	//w, h = len(*fovTestMap), len((*fovTestMap)[0])
 
@@ -73,7 +79,7 @@ func testFOV() {
 	key := ""
 	for key != "ESCAPE" {
 		// getVisibilityMap
-		visMap, currentFovAlgorithmName := getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius, &opacityMap)
+		visMap, currentFovAlgorithmName := getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius, w, h, &opacityMap)
 
 		// render map
 		for i := 0; i < len(*cave); i++ {
@@ -119,13 +125,12 @@ func testFOV() {
 	}
 }
 
-func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius int, opacityMap *[][]bool) (*[][]bool, string) {
+func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius, w, h int, opacityMap *[][]bool) (*[][]bool, string) {
 	var visMap *[][]bool
 	currentFovAlgorithmName := "WTF FOV"
 	switch currentFovSelected {
 	case 1:
-		strict_definition_fov.SetOpacityMap(opacityMap)
-		visMap = strict_definition_fov.GetFovMapFrom(px, py, fovRadius)
+		visMap = strict_definition_fov.GetFovMapFrom(px, py, fovRadius, w, h, opacityFunc)
 		currentFovAlgorithmName = "SDFOV"
 	case 2:
 		optimized_strict_definition_fov.SetOpacityMap(opacityMap)
@@ -136,12 +141,10 @@ func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius int, opa
 		visMap = basic_bresenham_fov.GetFovMapFrom(px, py, fovRadius)
 		currentFovAlgorithmName = "Bresenham FOV"
 	case 4:
-		permissive_fov.SetOpacityMap(opacityMap)
-		visMap = permissive_fov.GetFovMapFrom(px, py, fovRadius)
+		visMap = permissive_fov.GetFovMapFrom(px, py, fovRadius, w, h, opacityFunc)
 		currentFovAlgorithmName = "Permissive FOV"
 	case 5:
-		mill_fov.SetOpacityMap(opacityMap)
-		visMap = mill_fov.GetFovMapFrom(px, py, fovRadius)
+		visMap = mill_fov.GetFovMapFrom(px, py, fovRadius, w, h, opacityFunc)
 		currentFovAlgorithmName = "Mill FOV"
 	default:
 		basic_two_step_fov.SetOpacityMap(opacityMap)
@@ -167,7 +170,7 @@ func fovAlgsPerfomanceCheck(px, py, w, h, fovRadius int, opacityMap *[][]bool) {
 		taken := 0
 		start := time.Now()
 		for time.Now().Sub(start) / time.Millisecond < MillisecondsToTest {
-			_, name = getVisMapAndNameForAlgorithm(i, px, py, fovRadius, opacityMap)
+			_, name = getVisMapAndNameForAlgorithm(i, px, py, fovRadius, len(*opacityMap), len((*opacityMap)[0]), opacityMap)
 			taken++
 		}
 		console.PutString(fmt.Sprintf(" %s:%d calculations; ", name, taken), w/2 - borderW/2, h/2-totalAlgs-1+i)
