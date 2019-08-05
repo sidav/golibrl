@@ -33,7 +33,7 @@ func random(modulo int) int {
 	}
 }
 
-func MakeCave(w, h, smoothness, seed int) *[]string {
+func MakeCave(w, h, initialWallPercentage, smoothness, seed int) *[]string {
 	x = seed
 	if seed < 0 {
 		randomize()
@@ -41,22 +41,21 @@ func MakeCave(w, h, smoothness, seed int) *[]string {
 	if smoothness < 1 {
 		smoothness = 1
 	}
-	cave := randomInitialFill(w, h)
+	cave := randomInitialFill(w, h, initialWallPercentage)
 	cave = cycle(cave, smoothness)
 	return cave
 }
 
-func randomInitialFill(w, h int) *[]string {
-	const WALL_PERCENTAGE = 35
-	cave := make([]string, h)
+func randomInitialFill(w, h, wallPercentage int) *[]string {
+	cave := make([]string, w)
 	for ind := range cave {
-		for i := 0; i < w; i++ {
+		for i := 0; i < h; i++ {
 			if ind - h/2 <= 2 && ind - h/2 > -2 {
 				cave[ind] += "."
 				continue
 			}
 			rnd := random(100)
-			if rnd < WALL_PERCENTAGE {
+			if rnd < wallPercentage {
 				cave[ind] += "#"
 			} else {
 				cave[ind] += "."
