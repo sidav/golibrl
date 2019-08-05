@@ -30,7 +30,7 @@ func emptyVisibilityMap(w, h int) {
 	visible = &vis
 }
 
-func Fov(x, y, radius int) *[][]bool {
+func GetFovMapFrom(x, y, radius int) *[][]bool {
 	emptyVisibilityMap(len(*opaque), len((*opaque)[0]))
 	circle := graphic_primitives.GetApproxCircleAroundRect(x, y, 0, 0, radius)
 	for i := range *circle {

@@ -27,7 +27,7 @@ func emptyVisibilityMap(w, h int) {
 	visible = &vis
 }
 
-func Fov(x, y, radius int) *[][]bool {
+func GetFovMapFrom(x, y, radius int) *[][]bool {
 	radius++
 	emptyVisibilityMap(len(*opaque), len((*opaque)[0]))
 	var i, j int

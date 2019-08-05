@@ -32,7 +32,7 @@ var (
 	quadrant, source offset
 )
 
-func Fov(x, y, radius int) *[][]bool {
+func GetFovMapFrom(x, y, radius int) *[][]bool {
 	source = offset{x, y}
 	rangeLimit = radius
 	emptyVisibilityMap(mapw, maph)

@@ -25,7 +25,7 @@ func emptyVisibilityMap(w, h int) {
 	visible = &vis
 }
 
-func Fov(fx, fy, rangeLimit int) *[][]bool {
+func GetFovMapFrom(fx, fy, rangeLimit int) *[][]bool {
 	emptyVisibilityMap(mapw, maph)
 	(*visible)[fx][fy] = true
 	var octant byte

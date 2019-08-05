@@ -125,27 +125,27 @@ func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius int, opa
 	switch currentFovSelected {
 	case 1:
 		strict_definition_fov.SetOpacityMap(opacityMap)
-		visMap = strict_definition_fov.Fov(px, py, fovRadius)
+		visMap = strict_definition_fov.GetFovMapFrom(px, py, fovRadius)
 		currentFovAlgorithmName = "SDFOV"
 	case 2:
 		optimized_strict_definition_fov.SetOpacityMap(opacityMap)
-		visMap = optimized_strict_definition_fov.Fov(px, py, fovRadius)
+		visMap = optimized_strict_definition_fov.GetFovMapFrom(px, py, fovRadius)
 		currentFovAlgorithmName = "Optimized SDFOV"
 	case 3:
 		basic_bresenham_fov.SetOpacityMap(opacityMap)
-		visMap = basic_bresenham_fov.GetCircleVisibilityMap(px, py, fovRadius)
+		visMap = basic_bresenham_fov.GetFovMapFrom(px, py, fovRadius)
 		currentFovAlgorithmName = "Bresenham FOV"
 	case 4:
 		permissive_fov.SetOpacityMap(opacityMap)
-		visMap = permissive_fov.Fov(px, py, fovRadius)
+		visMap = permissive_fov.GetFovMapFrom(px, py, fovRadius)
 		currentFovAlgorithmName = "Permissive FOV"
 	case 5:
 		mill_fov.SetOpacityMap(opacityMap)
-		visMap = mill_fov.Fov(px, py, fovRadius)
+		visMap = mill_fov.GetFovMapFrom(px, py, fovRadius)
 		currentFovAlgorithmName = "Mill FOV"
 	default:
 		basic_two_step_fov.SetOpacityMap(opacityMap)
-		visMap = basic_two_step_fov.GetCircleVisibilityMap(px, py, fovRadius)
+		visMap = basic_two_step_fov.GetFovMapFrom(px, py, fovRadius)
 		currentFovAlgorithmName = "Two-step FOV"
 	}
 	return visMap, currentFovAlgorithmName

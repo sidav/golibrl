@@ -22,7 +22,7 @@ func emptyVisibilityMap(w, h int) {
 	visible = &vis
 }
 
-func GetCircleVisibilityMap(fromx, fromy, radius int) *[][]bool {
+func GetFovMapFrom(fromx, fromy, radius int) *[][]bool {
 	emptyVisibilityMap(len(*opaque), len((*opaque)[0]))
 	doFirstStep(fromx, fromy, radius)
 	// doSecondStep(fromx, fromy, radius)
