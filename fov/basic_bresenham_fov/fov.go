@@ -5,14 +5,12 @@ import (
 	"github.com/sidav/golibrl/graphic_primitives"
 )
 
+type opacityFunction func(int,int) bool
+
 var (
-	opaque  *[][]bool
+	opaque opacityFunction
 	visible *[][]bool
 )
-
-func SetOpacityMap(o *[][]bool) {
-	opaque = o
-}
 
 func emptyVisibilityMap(w, h int) {
 	vis := make([][]bool, w)
@@ -22,8 +20,9 @@ func emptyVisibilityMap(w, h int) {
 	visible = &vis
 }
 
-func GetFovMapFrom(fromx, fromy, radius int) *[][]bool {
-	emptyVisibilityMap(len(*opaque), len((*opaque)[0]))
+func GetFovMapFrom(fromx, fromy, radius, mapW, mapH int, opacityFunc opacityFunction) *[][]bool {
+	opaque = opacityFunc
+	emptyVisibilityMap(mapW, mapH)
 	doFirstStep(fromx, fromy, radius)
 	// doSecondStep(fromx, fromy, radius)
 	return visible
@@ -37,7 +36,7 @@ func doFirstStep(fromx, fromy, radius int) {
 				lx, ly := (*line)[lineIndex].X, (*line)[lineIndex].Y
 				if geometry.AreCoordsInRect(lx, ly, 0, 0, len(*visible), len((*visible)[0])) {
 					(*visible)[lx][ly] = true
-					if lineIndex > 0 && (*opaque)[lx][ly] {
+					if lineIndex > 0 && opaque(lx, ly) {
 						break
 					}
 				}

@@ -5,14 +5,13 @@ import (
 	"github.com/sidav/golibrl/graphic_primitives"
 )
 
-var (
-	opaque  *[][]bool
-	visible *[][]bool
-)
+type opacityFunction func(int,int) bool
 
-func SetOpacityMap(o *[][]bool) {
-	opaque = o
-}
+var (
+	opaque opacityFunction
+	visible *[][]bool
+	mapw, maph int
+)
 
 func emptyVisibilityMap(w, h int) {
 	vis := make([][]bool, w)
@@ -22,8 +21,10 @@ func emptyVisibilityMap(w, h int) {
 	visible = &vis
 }
 
-func GetFovMapFrom(fromx, fromy, radius int) *[][]bool {
-	emptyVisibilityMap(len(*opaque), len((*opaque)[0]))
+func GetFovMapFrom(fromx, fromy, radius, mapW, mapH int, opacityFunc opacityFunction) *[][]bool {
+	mapw, maph = mapW, mapH
+	opaque = opacityFunc
+	emptyVisibilityMap(mapW, mapH)
 	doFirstStep(fromx, fromy, radius)
 	doSecondStep(fromx, fromy, radius)
 	return visible
@@ -37,7 +38,7 @@ func doFirstStep(fromx, fromy, radius int) {
 			lx, ly := (*line)[j].X, (*line)[j].Y
 			if geometry.AreCoordsInRect(lx, ly, 0, 0, len(*visible), len((*visible)[0])) {
 				(*visible)[lx][ly] = true
-				if j > 0 && (*opaque)[lx][ly] {
+				if j > 0 && opaque(lx, ly) {
 					break
 				}
 			}
@@ -49,7 +50,7 @@ func doSecondStep(fromx, fromy, radius int) {
 	visibleList := make([]graphic_primitives.Point, 0)
 	for x := fromx - radius + 1; x < fromx+radius-1; x++ {
 		for y := fromy - radius + 1; y < fromy+radius-1; y++ {
-			if geometry.AreCoordsInRect(x, y, 1, 1, len(*opaque)-2, len((*opaque)[0])-2) {
+			if geometry.AreCoordsInRect(x, y, 1, 1, mapw-2, maph-2) {
 				totalVisibles := 0
 			checkNeighbours:
 				for i := -1; i <= 1; i++ {

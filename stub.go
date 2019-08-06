@@ -6,7 +6,6 @@ import (
 	"github.com/sidav/golibrl/fov/basic_bresenham_fov"
 	"github.com/sidav/golibrl/fov/basic_two_step_fov"
 	"github.com/sidav/golibrl/fov/mill_fov"
-	"github.com/sidav/golibrl/fov/optimized_strict_definition_fov"
 	"github.com/sidav/golibrl/fov/permissive_fov"
 	"github.com/sidav/golibrl/fov/strict_definition_fov"
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
@@ -133,29 +132,23 @@ func getVisMapAndNameForAlgorithm(currentFovSelected, px, py, fovRadius, w, h in
 		visMap = strict_definition_fov.GetFovMapFrom(px, py, fovRadius, w, h, opacityFunc)
 		currentFovAlgorithmName = "SDFOV"
 	case 2:
-		optimized_strict_definition_fov.SetOpacityMap(opacityMap)
-		visMap = optimized_strict_definition_fov.GetFovMapFrom(px, py, fovRadius)
-		currentFovAlgorithmName = "Optimized SDFOV"
-	case 3:
-		basic_bresenham_fov.SetOpacityMap(opacityMap)
-		visMap = basic_bresenham_fov.GetFovMapFrom(px, py, fovRadius)
+		visMap = basic_bresenham_fov.GetFovMapFrom(px, py, fovRadius, w, h, opacityFunc)
 		currentFovAlgorithmName = "Bresenham FOV"
-	case 4:
+	case 3:
 		visMap = permissive_fov.GetFovMapFrom(px, py, fovRadius, w, h, opacityFunc)
 		currentFovAlgorithmName = "Permissive FOV"
-	case 5:
+	case 4:
 		visMap = mill_fov.GetFovMapFrom(px, py, fovRadius, w, h, opacityFunc)
 		currentFovAlgorithmName = "Mill FOV"
 	default:
-		basic_two_step_fov.SetOpacityMap(opacityMap)
-		visMap = basic_two_step_fov.GetFovMapFrom(px, py, fovRadius)
+		visMap = basic_two_step_fov.GetFovMapFrom(px, py, fovRadius, w, h, opacityFunc)
 		currentFovAlgorithmName = "Two-step FOV"
 	}
 	return visMap, currentFovAlgorithmName
 }
 
 func fovAlgsPerfomanceCheck(px, py, w, h, fovRadius int, opacityMap *[][]bool) {
-	const totalAlgs = 6
+	const totalAlgs = 5
 	const MillisecondsToTest = 1000
 	console.SetBgColor(console.DARK_GRAY)
 	console.SetFgColor(console.BLACK)
