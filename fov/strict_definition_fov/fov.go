@@ -7,29 +7,27 @@ import (
 	"math"
 )
 
+type opacityFunction func(int, int) bool
+
 var (
 	mapw, maph int
-	opaque  *[][]bool
+	opaque  opacityFunction
 	visible *[][]bool
 )
 
-func SetOpacityMap(o *[][]bool) {
-	opaque = o
-	mapw = len(*opaque)
-	maph = len((*opaque)[0])
-}
-
-func emptyVisibilityMap(w, h int) {
-	vis := make([][]bool, w)
+func emptyVisibilityMap() {
+	vis := make([][]bool, mapw)
 	for i := range vis {
-		vis[i] = make([]bool, h)
+		vis[i] = make([]bool, maph)
 	}
 	visible = &vis
 }
 
-func GetFovMapFrom(x, y, radius int) *[][]bool {
+func GetFovMapFrom(x, y, radius, mapW, mapH int, opacityFunc opacityFunction) *[][]bool {
+	opaque = opacityFunc
+	mapw, maph = mapW, mapH
 	radius++
-	emptyVisibilityMap(len(*opaque), len((*opaque)[0]))
+	emptyVisibilityMap()
 	var i, j int
 	for i = -radius; i <= radius; i++ { //iterate out of map bounds as well (radius^1)
 		for j = -radius; j <= radius; j++ { //(radius^2)
@@ -66,7 +64,7 @@ func los(x0, y0, x1, y1 int) {
 	for xnext != x1 || ynext != y1 { //essentially casting a ray of length radius: (radius^3)
 
 		if geometry.AreCoordsInRect(xnext, ynext, 0, 0, mapw, maph) {
-			if (*opaque)[xnext][ynext] { // or any equivalent
+			if opaque(xnext, ynext) { // or any equivalent
 				// tag_memorised(xnext, ynext); // make a note of the wall
 				(*visible)[xnext][ynext] = true
 				return

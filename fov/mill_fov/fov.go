@@ -1,35 +1,39 @@
 package mill_fov
 
-import "github.com/sidav/golibrl/geometry"
+import (
+	"github.com/sidav/golibrl/geometry"
+)
 
 // This algorithm is taken from http://www.adammil.net/blog/v125_roguelike_vision_algorithms.html
 // Rewritten in Go by sidav
 
+type opacityFunction func(int, int) bool
+
 var (
-	mapw, maph, rangeLimit int
-	opaque                 *[][]bool
-	visible                *[][]bool
+	mapw, maph int
+	opaque     opacityFunction
+	visible    *[][]bool
 )
 
-func SetOpacityMap(o *[][]bool) {
-	opaque = o
-	mapw = len(*opaque)
-	maph = len((*opaque)[0])
-}
-
-func emptyVisibilityMap(w, h int) {
-	vis := make([][]bool, w)
+func emptyVisibilityMap() {
+	vis := make([][]bool, mapw)
 	for i := range vis {
-		vis[i] = make([]bool, h)
+		vis[i] = make([]bool, maph)
 	}
 	visible = &vis
 }
 
-func GetFovMapFrom(fx, fy, rangeLimit int) *[][]bool {
-	emptyVisibilityMap(mapw, maph)
-	(*visible)[fx][fy] = true
+func GetFovMapFrom(fx, fy, rangeLimit, mapW, mapH int, opacityFunc opacityFunction) *[][]bool {
+	opaque = opacityFunc
+	mapw, maph = mapW, mapH
+	emptyVisibilityMap()
+	
+	if geometry.AreCoordsInRect(fx, fy, 0, 0, mapw, maph) {
+		(*visible)[fx][fy] = true
+	}
+
 	var octant byte
-	for octant =0; octant <8; octant++{
+	for octant = 0; octant < 8; octant++ {
 		computeOctant(octant, fx, fy, rangeLimit, 1, &slope{1, 1}, &slope{0, 1})
 	}
 	return visible
@@ -60,7 +64,7 @@ func computeOctant(octant byte, fx, fy, rangeLimit, x int, top, bottom *slope) {
 			// tile, this is (x-0.5)*top+0.5, which can be computed as (x-0.5)*top+0.5 = (2(x+0.5)*top+1)/2 =
 			// ((2x+1)*top+1)/2. since top == a/b, this is ((2x+1)*a+b)/2b. if it enters a tile at one of the left
 			// corners, it will round up, so it'll enter from the bottom-left and never the top-left
-			topY = ((x*2-1) * top.Y + top.X) / (top.X*2) // the Y coordinate of the tile entered from the left
+			topY = ((x*2-1)*top.Y + top.X) / (top.X * 2) // the Y coordinate of the tile entered from the left
 			// now it's possible that the vector passes from the left side of the tile up into the tile above before
 			// exiting from the right side of this column. so we may need to increment topY
 
@@ -100,7 +104,7 @@ func computeOctant(octant byte, fx, fy, rangeLimit, x int, top, bottom *slope) {
 				// larger than a wall diamond, so if it wouldn't pass through a wall diamond then it can't be visible, so
 				// there's no point in incrementing topY even if light passes through the corner of the tile above. so we
 				// might as well use the bottom center for both cases.
-				ax := x*2 // center
+				ax := x * 2 // center
 				if blocksLight(x+1, topY+1, octant, fx, fy) {
 					ax++ // use bottom-right if the tile above and right is a wall
 				}
@@ -114,7 +118,7 @@ func computeOctant(octant byte, fx, fy, rangeLimit, x int, top, bottom *slope) {
 			// bottom.Y starts at zero and remains zero as long as it doesn't hit anything, so it's common
 			bottomY = 0
 		} else { // bottom > 0
-			bottomY = ((x*2-1) * bottom.Y + bottom.X) / (bottom.X*2) // the tile that the bottom vector enters from the left
+			bottomY = ((x*2-1)*bottom.Y + bottom.X) / (bottom.X * 2) // the tile that the bottom vector enters from the left
 			// code below assumes that if a tile is a wall then it's visible, so if the tile contains a wall we have to
 			// ensure that the bottom vector actually hits the wall shape. it misses the wall shape if the top-left corner
 			// is beveled and bottom >= (bottomY*2+1)/(x*2). finally, the top-left corner is beveled if the tiles to the
@@ -122,85 +126,85 @@ func computeOctant(octant byte, fx, fy, rangeLimit, x int, top, bottom *slope) {
 			// would be greater, so we only have to check above
 			if bottom.GreaterOrEqual(bottomY*2+1, x*2) && blocksLight(x, bottomY, octant, fx, fy) &&
 				!blocksLight(x, bottomY+1, octant, fx, fy) {
-					bottomY++
+				bottomY++
 			}
 		}
 
 		// go through the tiles in the column now that we know which ones could possibly be visible
 		wasOpaque := int8(-1) // 0:false, 1:true, -1:not applicable
-		for y:=topY; y >= bottomY; y-- { // use a signed comparison because y can wrap around when decremented
+		for y := topY; y >= bottomY; y-- { // use a signed comparison because y can wrap around when decremented
 			if geometry.AreCoordsInRange(x, y, 0, 0, rangeLimit) { // skip the tile if it's out of visual range
-			isOpaque := blocksLight(x, y, octant, fx, fy)
-			// every tile where topY > y > bottomY is guaranteed to be visible. also, the code that initializes topY and
-			// bottomY guarantees that if the tile is opaque then it's visible. so we only have to do extra work for the
-			// case where the tile is clear and y == topY or y == bottomY. if y == topY then we have to make sure that
-			// the top vector is above the bottom-right corner of the inner square. if y == bottomY then we have to make
-			// sure that the bottom vector is below the top-left corner of the inner square
-			isVisible := isOpaque || ((y != topY || top.Greater(y*4-1, x*4+1)) && (y != bottomY || bottom.Less(y*4+1, x*4-1)))
-			// NOTE: if you want the algorithm to be either fully or mostly symmetrical, replace the line above with the
-			// following line (and uncomment the Slope.LessOrEqual method). the line ensures that a clear tile is visible
-			// only if there's an unobstructed line to its center. if you want it to be fully symmetrical, also remove
-			// the "isOpaque ||" part and see NOTE comments further down
-			// bool isVisible = isOpaque || ((y != topY || top.GreaterOrEqual(y, x)) && (y != bottomY || bottom.LessOrEqual(y, x)));
-			if isVisible {
-				setVisible(x, y, octant, fx, fy)
-			}
+				isOpaque := blocksLight(x, y, octant, fx, fy)
+				// every tile where topY > y > bottomY is guaranteed to be visible. also, the code that initializes topY and
+				// bottomY guarantees that if the tile is opaque then it's visible. so we only have to do extra work for the
+				// case where the tile is clear and y == topY or y == bottomY. if y == topY then we have to make sure that
+				// the top vector is above the bottom-right corner of the inner square. if y == bottomY then we have to make
+				// sure that the bottom vector is below the top-left corner of the inner square
+				isVisible := isOpaque || ((y != topY || top.Greater(y*4-1, x*4+1)) && (y != bottomY || bottom.Less(y*4+1, x*4-1)))
+				// NOTE: if you want the algorithm to be either fully or mostly symmetrical, replace the line above with the
+				// following line (and uncomment the Slope.LessOrEqual method). the line ensures that a clear tile is visible
+				// only if there's an unobstructed line to its center. if you want it to be fully symmetrical, also remove
+				// the "isOpaque ||" part and see NOTE comments further down
+				// bool isVisible = isOpaque || ((y != topY || top.GreaterOrEqual(y, x)) && (y != bottomY || bottom.LessOrEqual(y, x)));
+				if isVisible {
+					setVisible(x, y, octant, fx, fy)
+				}
 
-			// if we found a transition from clear to opaque or vice versa, adjust the top and bottom vectors
-			if x != rangeLimit { // but don't bother adjusting them if this is the last column anyway
-				if isOpaque {
-					if wasOpaque == 0 { // if we found a transition from clear to opaque, this sector is done in this column,
-						// so adjust the bottom vector upward and continue processing it in the next column
-						// if the opaque tile has a beveled top-left corner, move the bottom vector up to the top center.
-						// otherwise, move it up to the top left. the corner is beveled if the tiles above and to the left are
-						// clear. we can assume the tile to the left is clear because otherwise the vector would be higher, so
-						// we only have to check the tile above
-						nx := x*2
-						ny := y*2+1 // top center by default
-						// NOTE: if you're using full symmetry and want more expansive walls (recommended), comment out the next condition
-						if blocksLight(x, y+1, octant, fx, fy) {
-							nx-- // top left if the corner is not beveled
-						}
-						if top.Greater(ny, nx) { // we have to maintain the invariant that top > bottom, so the new sector
-							// created by adjusting the bottom is only valid if that's the case
-							// if we're at the bottom of the column, then just adjust the current sector rather than recursing
-							// since there's no chance that this sector can be split in two by a later transition back to clear
-							if y == bottomY {
-								bottom = &slope{ny, nx}
-								break // don't recurse unless necessary
-							} else {
-								computeOctant(octant, fx, fy, rangeLimit, x+1, top, &slope{ny, nx})
+				// if we found a transition from clear to opaque or vice versa, adjust the top and bottom vectors
+				if x != rangeLimit { // but don't bother adjusting them if this is the last column anyway
+					if isOpaque {
+						if wasOpaque == 0 { // if we found a transition from clear to opaque, this sector is done in this column,
+							// so adjust the bottom vector upward and continue processing it in the next column
+							// if the opaque tile has a beveled top-left corner, move the bottom vector up to the top center.
+							// otherwise, move it up to the top left. the corner is beveled if the tiles above and to the left are
+							// clear. we can assume the tile to the left is clear because otherwise the vector would be higher, so
+							// we only have to check the tile above
+							nx := x * 2
+							ny := y*2 + 1 // top center by default
+							// NOTE: if you're using full symmetry and want more expansive walls (recommended), comment out the next condition
+							if blocksLight(x, y+1, octant, fx, fy) {
+								nx-- // top left if the corner is not beveled
 							}
-						} else {
-							// the new bottom is greater than or equal to the top, so the new sector is empty and we'll ignore
-							// it. if we're at the bottom of the column, we'd normally adjust the current sector rather than
-							// recursing, so that invalidates the current sector and we're done
-							if y == bottomY {
+							if top.Greater(ny, nx) { // we have to maintain the invariant that top > bottom, so the new sector
+								// created by adjusting the bottom is only valid if that's the case
+								// if we're at the bottom of the column, then just adjust the current sector rather than recursing
+								// since there's no chance that this sector can be split in two by a later transition back to clear
+								if y == bottomY {
+									bottom = &slope{ny, nx}
+									break // don't recurse unless necessary
+								} else {
+									computeOctant(octant, fx, fy, rangeLimit, x+1, top, &slope{ny, nx})
+								}
+							} else {
+								// the new bottom is greater than or equal to the top, so the new sector is empty and we'll ignore
+								// it. if we're at the bottom of the column, we'd normally adjust the current sector rather than
+								// recursing, so that invalidates the current sector and we're done
+								if y == bottomY {
+									return
+								}
+							}
+						}
+						wasOpaque = 1
+					} else {
+						if wasOpaque > 0 { // if we found a transition from opaque to clear, adjust the top vector downwards
+							// if the opaque tile has a beveled bottom-right corner, move the top vector down to the bottom center.
+							// otherwise, move it down to the bottom right. the corner is beveled if the tiles below and to the right
+							// are clear. we know the tile below is clear because that's the current tile, so just check to the right
+							nx := x * 2
+							ny := y*2 + 1 // the bottom of the opaque tile (oy*2-1) equals the top of this tile (y*2+1)
+							// NOTE: if you're using full symmetry and want more expansive walls (recommended), comment out the next condition
+							if blocksLight(x+1, y+1, octant, fx, fy) { // check the right of the opaque tile (y+1), not this one
+								nx++
+							}
+							// we have to maintain the invariant that top > bottom. if not, the sector is empty and we're done
+							if bottom.GreaterOrEqual(ny, nx) {
 								return
 							}
+							top = &slope{ny, nx}
 						}
+						wasOpaque = 0
 					}
-					wasOpaque = 1
-				} else {
-					if wasOpaque > 0 { // if we found a transition from opaque to clear, adjust the top vector downwards
-						// if the opaque tile has a beveled bottom-right corner, move the top vector down to the bottom center.
-						// otherwise, move it down to the bottom right. the corner is beveled if the tiles below and to the right
-						// are clear. we know the tile below is clear because that's the current tile, so just check to the right
-						nx := x*2
-						ny := y*2 + 1 // the bottom of the opaque tile (oy*2-1) equals the top of this tile (y*2+1)
-						// NOTE: if you're using full symmetry and want more expansive walls (recommended), comment out the next condition
-						if blocksLight(x+1, y+1, octant, fx, fy) { // check the right of the opaque tile (y+1), not this one
-							nx++
-						}
-						// we have to maintain the invariant that top > bottom. if not, the sector is empty and we're done
-						if bottom.GreaterOrEqual(ny, nx) {
-							return
-						}
-						top = &slope{ny, nx}
-					}
-					wasOpaque = 0
 				}
-			}
 
 			}
 		}
@@ -220,17 +224,41 @@ func blocksLight(x, y int, octant byte, fx, fy int) bool {
 	nx := fx
 	ny := fy
 	switch octant {
-	case 0: nx += x; ny -= y; break
-	case 1: nx += y; ny -= x; break
-	case 2: nx -= y; ny -= x; break
-	case 3: nx -= x; ny -= y; break
-	case 4: nx -= x; ny += y; break
-	case 5: nx -= y; ny += x; break
-	case 6: nx += y; ny += x; break
-	case 7: nx += x; ny += y; break
+	case 0:
+		nx += x;
+		ny -= y;
+		break
+	case 1:
+		nx += y;
+		ny -= x;
+		break
+	case 2:
+		nx -= y;
+		ny -= x;
+		break
+	case 3:
+		nx -= x;
+		ny -= y;
+		break
+	case 4:
+		nx -= x;
+		ny += y;
+		break
+	case 5:
+		nx -= y;
+		ny += x;
+		break
+	case 6:
+		nx += y;
+		ny += x;
+		break
+	case 7:
+		nx += x;
+		ny += y;
+		break
 	}
 	if geometry.AreCoordsInRect(nx, ny, 0, 0, mapw, maph) {
-		return (*opaque)[nx][ny]
+		return opaque(nx, ny)
 	} else {
 		return true
 	}
@@ -240,14 +268,38 @@ func setVisible(x, y int, octant byte, fx, fy int) {
 	nx := fx
 	ny := fy
 	switch octant {
-	case 0: nx += x; ny -= y; break
-	case 1: nx += y; ny -= x; break
-	case 2: nx -= y; ny -= x; break
-	case 3: nx -= x; ny -= y; break
-	case 4: nx -= x; ny += y; break
-	case 5: nx -= y; ny += x; break
-	case 6: nx += y; ny += x; break
-	case 7: nx += x; ny += y; break
+	case 0:
+		nx += x;
+		ny -= y;
+		break
+	case 1:
+		nx += y;
+		ny -= x;
+		break
+	case 2:
+		nx -= y;
+		ny -= x;
+		break
+	case 3:
+		nx -= x;
+		ny -= y;
+		break
+	case 4:
+		nx -= x;
+		ny += y;
+		break
+	case 5:
+		nx -= y;
+		ny += x;
+		break
+	case 6:
+		nx += y;
+		ny += x;
+		break
+	case 7:
+		nx += x;
+		ny += y;
+		break
 	}
 	if geometry.AreCoordsInRect(nx, ny, 0, 0, mapw, maph) {
 		(*visible)[nx][ny] = true
