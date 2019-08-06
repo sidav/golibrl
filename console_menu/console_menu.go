@@ -81,6 +81,44 @@ func ShowSimpleInfoWindow(title, text string, w, h, outlineColor int) {
 	}
 }
 
+func ShowSimpleNotificationModalWindow(text string) {
+	var w, h int
+	var wrap bool
+	c_w, c_h := cw.GetConsoleSize()
+	for {
+		if len(text) <= c_w/3 {
+			w = len(text) + 2
+			h = 5
+		} else {
+			wrap = true
+			w = c_w/3 + 2
+			h = len(text)/w + 4
+		}
+		x, y := (c_w-w)/2, (c_h-h)/2
+		// draw background
+		cw.SetBgColor(cw.DARK_GRAY)
+		for i := x; i < x+w; i++ {
+			for j := y; j < y+h; j++ {
+				cw.PutChar(' ', i, j)
+			}
+		}
+		if wrap {
+			DrawWrappedTextInRect(text, x+1, y+1, w-1, h-3)
+		} else {
+			cw.PutString(text, x+1, y+1)
+		}
+		cw.PutString("PRESS Y OR ENTER", x+w/2-6, y+h-2)
+		cw.Flush_console()
+		key := cw.ReadKey()
+		cw.SetBgColor(cw.BLACK)
+		switch key {
+		case "y", "ENTER":
+			return
+		}
+	}
+}
+
+
 func ShowSimpleYNChoiceModalWindow(text string) bool {
 	var w, h int
 	var wrap bool
