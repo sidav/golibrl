@@ -8,6 +8,6 @@ type Dice struct {
 	dnum, dval, dmod int
 }
 
-func (d *Dice) roll(prng DicePrng) int {
+func (d *Dice) Roll(prng DicePrng) int {
 	return prng.RollDice(d.dnum, d.dval, d.dmod)
 }
