@@ -10,6 +10,7 @@ import (
 	"github.com/sidav/golibrl/fov/strict_definition_fov"
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
+	"github.com/sidav/golibrl/procedural_generation/RBR_generator"
 	"strconv"
 	"strings"
 	"time"
@@ -20,10 +21,11 @@ func main() {
 	defer console.Close_console()
 	key := ""
 	for key != "ESCAPE" {
+		testRBR()
 		// angletest()
 		// testFractalLandscape()
 		// testCave()
-		testFOV()
+		// testFOV()
 		console.Flush_console()
 		key = console.ReadKey()
 	}
@@ -175,6 +177,28 @@ func fovAlgsPerfomanceCheck(px, py, w, h, fovRadius int, opacityMap *[][]bool) {
 	console.Flush_console()
 	console.SetBgColor(console.BLACK)
 	console.ReadKey()
+}
+
+func testRBR() {
+	w, h := console.GetConsoleSize()
+	gen := RBR_generator.RBR{}
+	gen.Init(w, h)
+	gen.Generate()
+	cave := gen.GetMapChars()
+	console.SetFgColor(console.WHITE)
+	for i := 0; i < len(*cave); i++ {
+		str := ' '
+		for j := 0; j < len((*cave)[0]); j++ {
+			str = rune((*cave)[i][j])
+			switch str {
+			case '#':
+				console.SetFgColor(console.DARK_RED)
+			default:
+				console.SetFgColor(console.WHITE)
+			}
+			console.PutChar(str, i, j)
+		}
+	}
 }
 
 func testCave() {
