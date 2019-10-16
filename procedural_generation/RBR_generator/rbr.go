@@ -1,38 +1,48 @@
 package RBR_generator
 
+import "github.com/sidav/golibrl/random/additive_random"
+
 type RBR struct {
 	tiles      [][]tile
 	mapw, maph int
+	MIN_CLENGTH, MAX_CLENGTH int  
 }
 
-func (rbr *RBR) Init(w, h int) {
-	rbr.tiles = make([][]tile, w)
-	for row := range rbr.tiles {
-		rbr.tiles[row] = make([]tile, h)
+var rnd additive_random.FibRandom
+
+func (r *RBR) Init(w, h int) {
+	rnd = additive_random.FibRandom{}
+	rnd.InitBySeed(-1)
+	r.tiles = make([][]tile, w)
+	for row := range r.tiles {
+		r.tiles[row] = make([]tile, h)
 	}
-	rbr.mapw = w
-	rbr.maph = h
+	r.mapw = w
+	r.maph = h
+
+	r.MIN_CLENGTH = 2 
+	r.MAX_CLENGTH = 10 
 }
 
-func (rbr *RBR) digSpace(x, y, w, h int) {
-	for cx:=0; cx < x+w; cx++ {
-		for cy:=0;cy<y+h; cy++ {
-			rbr.tiles[cx][cy].tiletype = TFLOOR
-		}
+func (r *RBR) Generate() {
+
+	for room := 0; room < 30000; room++ {
+		x := rnd.RandInRange(0, r.mapw)
+		y := rnd.RandInRange(0, r.maph)
+		w := rnd.RandInRange(3, 10)
+		h := rnd.RandInRange(3, 10)
+		r.digRoomIfPossible(x, y, w, h, 1)
 	}
 }
 
-func (rbr *RBR) Generate() {
-
-}
-
+///////////////////////////////////////////////////////////////////
 func (rbr *RBR) GetMapChars() *[][]rune {
 	runearr := make([][]rune, rbr.mapw)
 	for row := range runearr {
 		runearr[row] = make([]rune, rbr.maph)
 	}
-	for x:=0; x < rbr.mapw; x++ {
-		for y:=0;y<rbr.maph; y++ {
+	for x := 0; x < rbr.mapw; x++ {
+		for y := 0; y < rbr.maph; y++ {
 			runearr[x][y] = rbr.tiles[x][y].toRune()
 		}
 	}
