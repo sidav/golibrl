@@ -2,11 +2,11 @@ package RBR_generator
 
 func (r *RBR) digSpace(x, y, w, h int) {
 	if w < 0 {
-		x = x + w
+		x = x + w + 1
 		w = -w
 	}
 	if h < 0 {
-		y = y + w
+		y = y + h + 1
 		h = -h
 	}
 	for cx := x; cx < x+w; cx++ {

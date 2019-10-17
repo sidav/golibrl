@@ -185,16 +185,17 @@ func testRBR() {
 	gen.Init(w, h)
 	gen.Generate()
 	cave := gen.GetMapChars()
-	console.SetFgColor(console.WHITE)
+	console.SetFgColor(console.BLUE)
+	str := '#'
 	for i := 0; i < len(*cave); i++ {
 		for j := 0; j < len((*cave)[0]); j++ {
-			str := (*cave)[i][j]
+			str = (*cave)[i][j]
 			switch str {
 			case '#':
 				console.SetFgColor(console.DARK_RED)
 			case '+':
 				console.SetFgColor(console.GREEN)
-			default:
+			case '.':
 				console.SetFgColor(console.WHITE)
 			}
 			console.PutChar(str, i, j)

@@ -9,6 +9,7 @@ func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int) bool {
 	if h == 0 {
 		h = 1
 	}
+	// TODO: allow corridors end in rooms or another corridors 
 	if r.isSpaceOfGivenType(x+dirx, y+diry, w, h, 1, TWALL) {
 		r.digSpace(x, y, w, h)
 		return true
@@ -57,7 +58,7 @@ func (r *RBR) placeCorridorFrom(x, y int) bool {
 	digged := false
 	for !digged {
 		vx, vy := dirs[ind][0], dirs[ind][1]
-		corrLength := 5 // rnd.RandInRange(r.MIN_CLENGTH, r.MAX_CLENGTH)
+		corrLength := rnd.RandInRange(r.MIN_CLENGTH, r.MAX_CLENGTH)
 		digged = r.digCorridorIfPossible(x, y, vx, vy, corrLength)
 		ind = (ind + 1) % len(dirs)
 		if ind == startind && !digged {

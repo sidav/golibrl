@@ -36,7 +36,7 @@ func (r *RBR) Generate() {
 			success = r.digRoomIfPossible(x, y, w, h, 1)
 		}
 	}
-	for crrdr := 0; crrdr < 10; crrdr++ {
+	for crrdr := 0; crrdr < 100; crrdr++ {
 		x, y := r.pickTileForCorridorPlacement()
 		digged := r.placeCorridorFrom(x, y)
 		if !digged {
