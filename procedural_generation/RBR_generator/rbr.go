@@ -3,9 +3,9 @@ package RBR_generator
 import "github.com/sidav/golibrl/random/additive_random"
 
 type RBR struct {
-	tiles      [][]tile
-	mapw, maph int
-	MIN_CLENGTH, MAX_CLENGTH int  
+	tiles                    [][]tile
+	mapw, maph               int
+	MIN_CLENGTH, MAX_CLENGTH int
 }
 
 var rnd additive_random.FibRandom
@@ -20,18 +20,29 @@ func (r *RBR) Init(w, h int) {
 	r.mapw = w
 	r.maph = h
 
-	r.MIN_CLENGTH = 2 
-	r.MAX_CLENGTH = 10 
+	r.MIN_CLENGTH = 3
+	r.MAX_CLENGTH = 10
 }
 
 func (r *RBR) Generate() {
 
-	for room := 0; room < 30000; room++ {
-		x := rnd.RandInRange(0, r.mapw)
-		y := rnd.RandInRange(0, r.maph)
-		w := rnd.RandInRange(3, 10)
-		h := rnd.RandInRange(3, 10)
-		r.digRoomIfPossible(x, y, w, h, 1)
+	for room := 0; room < 1; room++ {
+		success := false
+		for !success {
+			x := rnd.RandInRange(0, r.mapw)
+			y := rnd.RandInRange(0, r.maph)
+			w := rnd.RandInRange(5, 10)
+			h := rnd.RandInRange(5, 10)
+			success = r.digRoomIfPossible(x, y, w, h, 1)
+		}
+	}
+	for crrdr := 0; crrdr < 10; crrdr++ {
+		x, y := r.pickTileForCorridorPlacement()
+		digged := r.placeCorridorFrom(x, y)
+		if !digged {
+			crrdr--
+			continue
+		}
 	}
 }
 
