@@ -38,14 +38,13 @@ func (r *RBR) countTiletypesAround(ttype byte, x, y int, diagonals bool) int {
 	}
 	return ttypes
 }
-
 func (r *RBR) isSpaceOfGivenType(x, y, w, h, outlineThickness int, ttype byte) bool {
 	if w < 0 {
-		x = x + w
+		x = x + w + 1
 		w = -w
 	}
 	if h < 0 {
-		y = y + w
+		y = y + h + 1
 		h = -h
 	}
 	x -= outlineThickness
