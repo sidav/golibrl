@@ -19,30 +19,20 @@ func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int) bool {
 
 func (r *RBR) placeCorridorFrom(x, y int) bool {
 	// first, collect list of vectors of diggable directions near the x,y
-	dirs := make([][]int, 0)
-	for vx := -1; vx <= 1; vx++ {
-		for vy := -1; vy <= 1; vy++ {
-			if x+vx < 0 || y+vy < 0 || x+vx >= r.mapw || y+vy >= r.maph {
-				continue
-			}
-			if vx != vy && vx*vy == 0 && r.tiles[x+vx][y+vy].tiletype == TWALL {
-				dirs = append(dirs, []int{vx, vy})
-			}
-		}
-	}
-	if len(dirs) == 0 {
+	dirs := r.pickListOfDiggableDirectionsFrom(x, y)
+	if len(*dirs) == 0 {
 		return false
 	}
 	// next, let's pick a random vector from them
-	startind := rnd.Rand(len(dirs))
+	startind := rnd.Rand(len(*dirs))
 	// ...starting from that index, try every direction.
 	ind := startind
 	digged := false
 	for !digged {
-		vx, vy := dirs[ind][0], dirs[ind][1]
+		vx, vy := (*dirs)[ind][0], (*dirs)[ind][1]
 		corrLength := rnd.RandInRange(r.MIN_CLENGTH, r.MAX_CLENGTH)
 		digged = r.digCorridorIfPossible(x, y, vx, vy, corrLength)
-		ind = (ind + 1) % len(dirs)
+		ind = (ind + 1) % len(*dirs)
 		if ind == startind && !digged {
 			return false
 		}
