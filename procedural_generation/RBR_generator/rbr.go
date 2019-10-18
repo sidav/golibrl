@@ -37,7 +37,7 @@ func (r *RBR) Generate() {
 		}
 	}
 	for crrdr := 0; crrdr < 100; crrdr++ {
-		x, y := r.pickTileForCorridorPlacement()
+		x, y := r.pickJunctionTile()
 		digged := r.placeCorridorFrom(x, y)
 		if !digged {
 			crrdr--

@@ -64,6 +64,24 @@ func (r *RBR) isSpaceOfGivenType(x, y, w, h, outlineThickness int, ttype byte) b
 	return true
 }
 
+func (r *RBR) pickJunctionTile() (int, int) {
+	listOfAppropriateCoords := make([][]int, 0)
+	for x := 0; x < r.mapw; x++ {
+		for y := 0; y < r.maph; y++ {
+			walls := r.countTiletypesAround(TWALL, x, y, false)
+			floors := r.countTiletypesAround(TFLOOR, x, y, false)
+			if r.tiles[x][y].tiletype == TWALL && walls == 3 && floors == 1 {
+				listOfAppropriateCoords = append(listOfAppropriateCoords, []int{x, y})
+			}
+		}
+	}
+	if len(listOfAppropriateCoords) == 0 {
+		panic("Oh fuck.")
+	}
+	indx := rnd.Rand(len(listOfAppropriateCoords))
+	return listOfAppropriateCoords[indx][0], listOfAppropriateCoords[indx][1]
+}
+
 func (r *RBR) digRoomIfPossible(x, y, w, h, oulinethick int) bool {
 	if r.isSpaceOfGivenType(x, y, w, h, 1, TWALL) {
 		r.digSpace(x, y, w, h)

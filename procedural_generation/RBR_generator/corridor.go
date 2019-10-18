@@ -17,24 +17,6 @@ func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int) bool {
 	return false
 }
 
-func (r *RBR) pickTileForCorridorPlacement() (int, int) {
-	listOfAppropriateCoords := make([][]int, 0)
-	for x := 0; x < r.mapw; x++ {
-		for y := 0; y < r.maph; y++ {
-			walls := r.countTiletypesAround(TWALL, x, y, false)
-			floors := r.countTiletypesAround(TFLOOR, x, y, false)
-			if r.tiles[x][y].tiletype == TWALL && walls == 3 && floors == 1 {
-				listOfAppropriateCoords = append(listOfAppropriateCoords, []int{x, y})
-			}
-		}
-	}
-	if len(listOfAppropriateCoords) == 0 {
-		panic("Oh fuck.")
-	}
-	indx := rnd.Rand(len(listOfAppropriateCoords))
-	return listOfAppropriateCoords[indx][0], listOfAppropriateCoords[indx][1]
-}
-
 func (r *RBR) placeCorridorFrom(x, y int) bool {
 	// first, collect list of vectors of diggable directions near the x,y
 	dirs := make([][]int, 0)
