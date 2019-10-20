@@ -15,19 +15,27 @@ func (r *RBR) pickListOfDiggableDirectionsFrom(x, y int) *[][]int {
 	return &dirs 
 }
 
-func (r *RBR) pickJunctionTile() (int, int) {
+func (r *RBR) pickJunctionTile(deadendOnly bool) (int, int) {
 	listOfAppropriateCoords := make([][]int, 0)
 	for x := 0; x < r.mapw; x++ {
 		for y := 0; y < r.maph; y++ {
-			walls := r.countTiletypesAround(TWALL, x, y, false)
-			floors := r.countTiletypesAround(TFLOOR, x, y, false)
-			if r.tiles[x][y].tiletype == TWALL && walls == 3 && floors == 1 {
-				listOfAppropriateCoords = append(listOfAppropriateCoords, []int{x, y})
+			if deadendOnly {
+				walls := r.countTiletypesAround(TWALL, x, y, true)
+				floors := r.countTiletypesAround(TFLOOR, x, y, false)
+				if r.tiles[x][y].tiletype == TWALL && walls == 7 && floors == 1 {
+					listOfAppropriateCoords = append(listOfAppropriateCoords, []int{x, y})
+				}
+			} else {
+				walls := r.countTiletypesAround(TWALL, x, y, false)
+				floors := r.countTiletypesAround(TFLOOR, x, y, false)
+				if r.tiles[x][y].tiletype == TWALL && walls == 3 && floors == 1 {
+					listOfAppropriateCoords = append(listOfAppropriateCoords, []int{x, y})
+				}
 			}
 		}
 	}
 	if len(listOfAppropriateCoords) == 0 {
-		panic("Oh fuck.")
+		return -1, -1
 	}
 	indx := rnd.Rand(len(listOfAppropriateCoords))
 	return listOfAppropriateCoords[indx][0], listOfAppropriateCoords[indx][1]

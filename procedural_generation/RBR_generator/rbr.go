@@ -8,6 +8,7 @@ type RBR struct {
 	MIN_CLENGTH, MAX_CLENGTH int
 	MIN_RSIZE, MAX_RSIZE     int
 	MINROOMS, MINCORRS       int
+	PLACEMENT_TRIES_LIMIT int 
 }
 
 var rnd additive_random.FibRandom
@@ -23,19 +24,21 @@ func (r *RBR) Init(w, h int) {
 	r.maph = h
 
 	r.MIN_CLENGTH = 3
-	r.MAX_CLENGTH = 10//r.mapw
+	r.MAX_CLENGTH = r.mapw / 2
 	r.MIN_RSIZE = 3
-	r.MAX_RSIZE = 10
+	r.MAX_RSIZE = r.mapw / 8
 
 
-	r.MINROOMS = 20
-	r.MINCORRS = 1
+	r.MINROOMS = 30
+	r.MINCORRS = 40
 
-	mapArea := r.mapw * r.maph
-	maxRoomArea := r.MAX_RSIZE*r.MAX_RSIZE
-	r.MINROOMS = mapArea / (3 * maxRoomArea / 2)
-	mapArea -= r.MINROOMS * maxRoomArea
-	r.MINCORRS = mapArea / (3*r.MAX_CLENGTH)
+	// mapArea := r.mapw * r.maph
+	// maxRoomArea := r.MAX_RSIZE*r.MAX_RSIZE
+	// r.MINROOMS = mapArea / (3 * maxRoomArea / 2)
+	// mapArea -= r.MINROOMS * maxRoomArea
+	// r.MINCORRS = mapArea / (3*r.MAX_CLENGTH)
+
+	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 10
 }
 
 func (r *RBR) Generate() {
@@ -51,9 +54,14 @@ func (r *RBR) Generate() {
 
 	roomsRemaining := r.MINROOMS - 1
 	corrsRemaining := r.MINCORRS
+	currLoop := 0
 
-	for roomsRemaining != 0 || corrsRemaining != 0 {
-		x, y := r.pickJunctionTile()
+	for (roomsRemaining != 0 || corrsRemaining != 0) && currLoop < r.PLACEMENT_TRIES_LIMIT {
+		placeOnDeadendOnly := rnd.RandInRange(0, 1) == 1 
+		x, y := r.pickJunctionTile(placeOnDeadendOnly)
+		if x == -1 && y == -1 {
+			x, y = r.pickJunctionTile(false)
+		}
 		placeRoom := rnd.RandInRange(1, roomsRemaining+corrsRemaining) > corrsRemaining
 		if placeRoom {
 			digged = r.placeRoomFromJunction(x, y)
@@ -66,7 +74,7 @@ func (r *RBR) Generate() {
 				corrsRemaining--
 			}
 		}
-
+		currLoop++
 	}
 }
 
