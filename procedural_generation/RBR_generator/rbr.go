@@ -24,13 +24,13 @@ func (r *RBR) Init(w, h int) {
 	r.maph = h
 
 	r.MIN_CLENGTH = 3
-	r.MAX_CLENGTH = r.mapw / 2
+	r.MAX_CLENGTH = r.mapw / 10
 	r.MIN_RSIZE = 3
-	r.MAX_RSIZE = r.mapw / 8
+	r.MAX_RSIZE = r.mapw / 10
 
 
-	r.MINROOMS = 30
-	r.MINCORRS = 40
+	r.MINROOMS = 300
+	r.MINCORRS = 500
 
 	// mapArea := r.mapw * r.maph
 	// maxRoomArea := r.MAX_RSIZE*r.MAX_RSIZE
@@ -57,7 +57,7 @@ func (r *RBR) Generate() {
 	currLoop := 0
 
 	for (roomsRemaining != 0 || corrsRemaining != 0) && currLoop < r.PLACEMENT_TRIES_LIMIT {
-		placeOnDeadendOnly := rnd.RandInRange(0, 1) == 1 
+		placeOnDeadendOnly := rnd.RandInRange(0, 10) > 0  
 		x, y := r.pickJunctionTile(placeOnDeadendOnly)
 		if x == -1 && y == -1 {
 			x, y = r.pickJunctionTile(false)

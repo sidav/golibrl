@@ -11,7 +11,9 @@ func (r *RBR) digSpace(x, y, w, h int) {
 	}
 	for cx := x; cx < x+w; cx++ {
 		for cy := y; cy < y+h; cy++ {
-			r.tiles[cx][cy].tiletype = TFLOOR
+			if cx*cy != 0 && cx < r.mapw-1 && cy < r.maph-1 { // restrict digging close to map end 
+				r.tiles[cx][cy].tiletype = TFLOOR
+			}
 		}
 	}
 }

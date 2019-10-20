@@ -3,16 +3,25 @@ package RBR_generator
 func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int) bool {
 	w := length * dirx
 	h := length * diry
+	wDec := 2 * dirx
+	hDec := 2 * diry
 	if w == 0 {
+		wDec = 0
 		w = 1
 	}
 	if h == 0 {
+		hDec = 0
 		h = 1
 	}
-	// TODO: allow corridors end in rooms or another corridors 
-	if r.isSpaceOfGivenType(x+dirx, y+diry, w, h, 1, TWALL) {
-		r.digSpace(x, y, w, h)
-		return true
+	// TODO: allow corridors end in rooms or another corridors
+	if r.isSpaceOfGivenType(x+dirx, y+diry, w-wDec, h-hDec, 1, TWALL) {
+		// check if the end is not diagonally aligned to a floor
+		corrEndX, corrEndY := x-dirx + length*dirx, y-diry + length*diry
+		if r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, false) > 0 ||
+			r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, true) == 0 {
+			r.digSpace(x, y, w, h)
+			return true
+		}
 	}
 	return false
 }
@@ -30,8 +39,15 @@ func (r *RBR) placeCorridorFrom(x, y int) bool {
 	digged := false
 	for !digged {
 		vx, vy := (*dirs)[ind][0], (*dirs)[ind][1]
+		// try various lengths for each direction
 		corrLength := rnd.RandInRange(r.MIN_CLENGTH, r.MAX_CLENGTH)
-		digged = r.digCorridorIfPossible(x, y, vx, vy, corrLength)
+		for lenTry := 0; lenTry < r.MAX_CLENGTH; lenTry++ {
+			digged = r.digCorridorIfPossible(x, y, vx, vy, corrLength)
+			if digged || corrLength == r.MIN_CLENGTH {
+				break
+			}
+			corrLength--
+		}
 		ind = (ind + 1) % len(*dirs)
 		if ind == startind && !digged {
 			return false
