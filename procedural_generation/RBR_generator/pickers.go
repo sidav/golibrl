@@ -15,10 +15,10 @@ func (r *RBR) pickListOfDiggableDirectionsFrom(x, y int) *[][]int {
 	return &dirs 
 }
 
-func (r *RBR) pickJunctionTile(deadendOnly bool) (int, int) {
+func (r *RBR) pickJunctionTile(fromx, fromy, tox, toy int, deadendOnly bool) (int, int) {
 	listOfAppropriateCoords := make([][]int, 0)
-	for x := 0; x < r.mapw; x++ {
-		for y := 0; y < r.maph; y++ {
+	for x := fromx; x < tox; x++ {
+		for y := fromy; y < toy; y++ {
 			if deadendOnly {
 				walls := r.countTiletypesAround(TWALL, x, y, true)
 				floors := r.countTiletypesAround(TFLOOR, x, y, false)

@@ -29,14 +29,14 @@ func (r *RBR) Init(w, h int) {
 	r.MAX_RSIZE = r.mapw / 10
 
 
-	r.MINROOMS = 300
-	r.MINCORRS = 500
+	r.MINROOMS = 30
+	r.MINCORRS = 50
 
-	// mapArea := r.mapw * r.maph
-	// maxRoomArea := r.MAX_RSIZE*r.MAX_RSIZE
-	// r.MINROOMS = mapArea / (3 * maxRoomArea / 2)
-	// mapArea -= r.MINROOMS * maxRoomArea
-	// r.MINCORRS = mapArea / (3*r.MAX_CLENGTH)
+	mapArea := r.mapw * r.maph
+	maxRoomArea := r.MAX_RSIZE*r.MAX_RSIZE
+	r.MINROOMS = mapArea / (3 * maxRoomArea / 2)
+	mapArea -= r.MINROOMS * maxRoomArea
+	r.MINCORRS = mapArea / (3*r.MAX_CLENGTH)
 
 	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 10
 }
@@ -57,12 +57,23 @@ func (r *RBR) Generate() {
 	currLoop := 0
 
 	for (roomsRemaining != 0 || corrsRemaining != 0) && currLoop < r.PLACEMENT_TRIES_LIMIT {
-		placeOnDeadendOnly := rnd.RandInRange(0, 10) > 0  
-		x, y := r.pickJunctionTile(placeOnDeadendOnly)
-		if x == -1 && y == -1 {
-			x, y = r.pickJunctionTile(false)
-		}
+		placementFromX, placementfromY := 0, 0 
+		placementToX, placementToY := r.mapw, r.maph
+		
 		placeRoom := rnd.RandInRange(1, roomsRemaining+corrsRemaining) > corrsRemaining
+		if !placeRoom {
+			placementFromX += r.MAX_RSIZE/2
+			placementfromY += r.MAX_RSIZE/2
+			placementToX -= r.MAX_RSIZE/2
+			placementToY -= r.MAX_RSIZE/2
+		}
+
+		placeOnDeadendOnly := rnd.RandInRange(0, 2) != 0  
+		x, y := r.pickJunctionTile(placementFromX, placementfromY, placementToX, placementToY, placeOnDeadendOnly)
+		if x == -1 && y == -1 {
+			x, y = r.pickJunctionTile(placementFromX, placementfromY, placementToX, placementToY, false)
+		}
+
 		if placeRoom {
 			digged = r.placeRoomFromJunction(x, y)
 			if digged {
