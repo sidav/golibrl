@@ -24,7 +24,7 @@ func (r *RBR) Init(w, h int) {
 	r.maph = h
 
 	r.MIN_CLENGTH = 2
-	r.MAX_CLENGTH = r.mapw / 10
+	r.MAX_CLENGTH = r.mapw - 2 
 	r.MIN_RSIZE = 3
 	r.MAX_RSIZE = 10 // r.mapw / 10
 
@@ -36,9 +36,9 @@ func (r *RBR) Init(w, h int) {
 	maxRoomArea := r.MAX_RSIZE*r.MAX_RSIZE
 	r.MINROOMS = mapArea / (maxRoomArea)
 	mapArea -= r.MINROOMS * maxRoomArea
-	r.MINCORRS = 5*r.MINROOMS/2 // mapArea / (r.MAX_CLENGTH) + 200 
+	r.MINCORRS = r.MINROOMS // mapArea / (r.MAX_CLENGTH) + 200 
 
-	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 250
+	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 100
 }
 
 func (r *RBR) Generate() {
