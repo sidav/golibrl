@@ -23,10 +23,10 @@ func (r *RBR) Init(w, h int) {
 	r.mapw = w
 	r.maph = h
 
-	r.MIN_CLENGTH = 3
+	r.MIN_CLENGTH = 2
 	r.MAX_CLENGTH = r.mapw / 10
 	r.MIN_RSIZE = 3
-	r.MAX_RSIZE = r.mapw / 10
+	r.MAX_RSIZE = 10 // r.mapw / 10
 
 
 	r.MINROOMS = 30
@@ -34,21 +34,23 @@ func (r *RBR) Init(w, h int) {
 
 	mapArea := r.mapw * r.maph
 	maxRoomArea := r.MAX_RSIZE*r.MAX_RSIZE
-	r.MINROOMS = mapArea / (3 * maxRoomArea / 2)
+	r.MINROOMS = mapArea / (maxRoomArea)
 	mapArea -= r.MINROOMS * maxRoomArea
-	r.MINCORRS = mapArea / (3*r.MAX_CLENGTH)
+	r.MINCORRS = 5*r.MINROOMS/2 // mapArea / (r.MAX_CLENGTH) + 200 
 
-	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 10
+	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 250
 }
 
 func (r *RBR) Generate() {
 	// place initial room
 	digged := false
 	for !digged {
-		x := rnd.RandInRange(1, r.mapw-1)
-		y := rnd.RandInRange(1, r.maph-1)
-		w := rnd.RandInRange(5, 10)
-		h := rnd.RandInRange(5, 10)
+
+		x := rnd.RandInRange(r.MAX_RSIZE, r.mapw-r.MAX_RSIZE-r.MIN_RSIZE)
+		y := rnd.RandInRange(r.MAX_RSIZE, r.maph-r.MAX_RSIZE - r.MIN_RSIZE)
+
+		w := rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE)
+		h := rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE)
 		r.digSpace(x, y, w, h, 1)
 		digged = true 
 	}
@@ -83,7 +85,8 @@ func (r *RBR) Generate() {
 				roomsPlaced++
 			}
 		} else {
-			digged = r.placeCorridorFrom(x, y)
+			forceNotDeadendCorridor := corrsPlaced > r.MINCORRS/4 || roomsPlaced > r.MINROOMS/2
+			digged = r.placeCorridorFrom(x, y, forceNotDeadendCorridor)
 			if digged {
 				corrsPlaced++
 			}
