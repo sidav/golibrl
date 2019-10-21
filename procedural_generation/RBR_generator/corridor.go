@@ -3,6 +3,7 @@ package RBR_generator
 func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int, forceNoDeadend bool) bool {
 	w := length * dirx
 	h := length * diry
+	// hdec and wdec are decrements in width and height of space checked for emptiness. Used for allowing the corridors end in other corridors and/or rooms.
 	wDec := 2 * dirx
 	hDec := 2 * diry
 	if w == 0 {
@@ -13,10 +14,15 @@ func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int, forceNoDeadend
 		hDec = 0
 		h = 1
 	}
-	// TODO: allow corridors end in rooms or another corridors
 	if r.isSpaceOfGivenType(x+dirx, y+diry, w-wDec, h-hDec, 1, TWALL) {
 		// check if the end is not diagonally aligned to a floor
 		corrEndX, corrEndY := x-dirx+length*dirx, y-diry+length*diry
+
+		// nect condition is used to reduce creating of corridors that can't lead to a newly placed room even theoretically. 
+		if corrEndX < 2*r.MIN_RSIZE || corrEndX > r.mapw - 2*r.MIN_RSIZE || corrEndY < 2*r.MIN_RSIZE || corrEndY > r.maph - 2*r.MIN_RSIZE {
+			return false 
+		}
+
 		if forceNoDeadend {
 			if r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, false) > 0 {
 				r.digSpace(x, y, w, h, 0)
