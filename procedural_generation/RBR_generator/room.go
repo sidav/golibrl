@@ -18,7 +18,7 @@ func (r *RBR) tryPlaceRoom(x, y, dirx, diry, roomw, roomh int) bool {
 
 func (r *RBR) placeRoomFromJunction(x, y int) bool {
 		// first, collect list of vectors of diggable directions near the x,y
-		dirs := r.pickListOfDiggableDirectionsFrom(x, y)
+		dirs := r.pickListOfDiggableDirectionsFrom(x, y, true)
 		if len(*dirs) == 0 {
 			return false
 		}

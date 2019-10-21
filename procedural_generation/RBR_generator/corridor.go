@@ -28,7 +28,8 @@ func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int) bool {
 
 func (r *RBR) placeCorridorFrom(x, y int) bool {
 	// first, collect list of vectors of diggable directions near the x,y
-	dirs := r.pickListOfDiggableDirectionsFrom(x, y)
+	allowContinuation := rnd.RandInRange(0, 3) == 0
+	dirs := r.pickListOfDiggableDirectionsFrom(x, y, allowContinuation)
 	if len(*dirs) == 0 {
 		return false
 	}

@@ -1,6 +1,6 @@
 package RBR_generator
 
-func (r *RBR) pickListOfDiggableDirectionsFrom(x, y int) *[][]int {
+func (r *RBR) pickListOfDiggableDirectionsFrom(x, y int, allowContinuation bool) *[][]int {
 	dirs := make([][]int, 0)
 	for vx := -1; vx <= 1; vx++ {
 		for vy := -1; vy <= 1; vy++ {
@@ -8,11 +8,13 @@ func (r *RBR) pickListOfDiggableDirectionsFrom(x, y int) *[][]int {
 				continue
 			}
 			if vx != vy && vx*vy == 0 && r.tiles[x+vx][y+vy].tiletype == TWALL {
-				dirs = append(dirs, []int{vx, vy})
+				if allowContinuation || r.tiles[x-vx][y-vy].tiletype != TFLOOR {
+					dirs = append(dirs, []int{vx, vy})
+				}
 			}
 		}
 	}
-	return &dirs 
+	return &dirs
 }
 
 func (r *RBR) pickJunctionTile(fromx, fromy, tox, toy int, deadendOnly bool) (int, int) {
