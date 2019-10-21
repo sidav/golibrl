@@ -45,21 +45,24 @@ func (r *RBR) Generate() {
 	// place initial room
 	digged := false
 	for !digged {
-		x := rnd.RandInRange(0, r.mapw)
-		y := rnd.RandInRange(0, r.maph)
+		x := rnd.RandInRange(1, r.mapw-1)
+		y := rnd.RandInRange(1, r.maph-1)
 		w := rnd.RandInRange(5, 10)
 		h := rnd.RandInRange(5, 10)
-		digged = r.digRoomIfPossible(x, y, w, h, 1)
+		r.digSpace(x, y, w, h, 1)
+		digged = true 
 	}
 
-	roomsRemaining := r.MINROOMS - 1
-	corrsRemaining := r.MINCORRS
+	roomsPlaced := 1
+	corrsPlaced := 0
 	currLoop := 0
 
-	for (roomsRemaining != 0 || corrsRemaining != 0) && currLoop < r.PLACEMENT_TRIES_LIMIT {
+	for (roomsPlaced < r.MINROOMS || corrsPlaced < r.MINCORRS) && currLoop < r.PLACEMENT_TRIES_LIMIT {
 		placementFromX, placementfromY := 0, 0 
 		placementToX, placementToY := r.mapw, r.maph
 		
+		roomsRemaining := r.MINROOMS - roomsPlaced
+		corrsRemaining := r.MINCORRS - corrsPlaced
 		placeRoom := rnd.RandInRange(1, roomsRemaining+corrsRemaining) > corrsRemaining
 		if !placeRoom {
 			placementFromX += r.MAX_RSIZE/2
@@ -75,14 +78,14 @@ func (r *RBR) Generate() {
 		}
 
 		if placeRoom {
-			digged = r.placeRoomFromJunction(x, y)
+			digged = r.placeRoomFromJunction(x, y, roomsPlaced+1)
 			if digged {
-				roomsRemaining--
+				roomsPlaced++
 			}
 		} else {
 			digged = r.placeCorridorFrom(x, y)
 			if digged {
-				corrsRemaining--
+				corrsPlaced++
 			}
 		}
 		currLoop++

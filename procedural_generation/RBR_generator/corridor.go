@@ -19,7 +19,7 @@ func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int) bool {
 		corrEndX, corrEndY := x-dirx + length*dirx, y-diry + length*diry
 		if r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, false) > 0 ||
 			r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, true) == 0 {
-			r.digSpace(x, y, w, h)
+			r.digSpace(x, y, w, h, 0)
 			return true
 		}
 	}
@@ -54,6 +54,6 @@ func (r *RBR) placeCorridorFrom(x, y int) bool {
 			return false
 		}
 	}
-	r.tiles[x][y].tiletype = TDOOR
+	r.placeDoorIfNeeded(x, y)
 	return true
 }

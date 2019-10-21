@@ -1,6 +1,6 @@
 package RBR_generator
 
-func (r *RBR) digSpace(x, y, w, h int) {
+func (r *RBR) digSpace(x, y, w, h, roomId int) {
 	if w < 0 {
 		x = x + w + 1
 		w = -w
@@ -13,6 +13,7 @@ func (r *RBR) digSpace(x, y, w, h int) {
 		for cy := y; cy < y+h; cy++ {
 			if cx*cy != 0 && cx < r.mapw-1 && cy < r.maph-1 { // restrict digging close to map end 
 				r.tiles[cx][cy].tiletype = TFLOOR
+				r.tiles[cx][cy].roomId = roomId
 			}
 		}
 	}
@@ -66,10 +67,10 @@ func (r *RBR) isSpaceOfGivenType(x, y, w, h, outlineThickness int, ttype byte) b
 	return true
 }
 
-func (r *RBR) digRoomIfPossible(x, y, w, h, oulinethick int) bool {
-	if r.isSpaceOfGivenType(x, y, w, h, 1, TWALL) {
-		r.digSpace(x, y, w, h)
-		return true
-	}
-	return false
-}
+// func (r *RBR) digRoomIfPossible(x, y, w, h, oulinethick int) bool {
+// 	if r.isSpaceOfGivenType(x, y, w, h, 1, TWALL) {
+// 		r.digSpace(x, y, w, h)
+// 		return true
+// 	}
+// 	return false
+// }

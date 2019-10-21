@@ -1,6 +1,6 @@
 package RBR_generator
 
-func (r *RBR) tryPlaceRoom(x, y, dirx, diry, roomw, roomh int) bool {
+func (r *RBR) tryPlaceRoom(x, y, dirx, diry, roomw, roomh, roomId int) bool {
 	w := roomw * dirx
 	h := roomh * diry
 	if w == 0 {
@@ -10,13 +10,13 @@ func (r *RBR) tryPlaceRoom(x, y, dirx, diry, roomw, roomh int) bool {
 		h = roomh
 	}
 	if r.isSpaceOfGivenType(x+dirx, y+diry, w, h, 1, TWALL) {
-		r.digSpace(x+dirx, y+diry, w, h)
+		r.digSpace(x+dirx, y+diry, w, h, roomId)
 		return true
 	}
 	return false
 }
 
-func (r *RBR) placeRoomFromJunction(x, y int) bool {
+func (r *RBR) placeRoomFromJunction(x, y, roomId int) bool {
 		// first, collect list of vectors of diggable directions near the x,y
 		dirs := r.pickListOfDiggableDirectionsFrom(x, y, true)
 		if len(*dirs) == 0 {
@@ -31,7 +31,7 @@ func (r *RBR) placeRoomFromJunction(x, y int) bool {
 			vx, vy := (*dirs)[ind][0], (*dirs)[ind][1]
 			roomW := rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE)
 			roomH := rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE)
-			digged = r.tryPlaceRoom(x, y, vx, vy, roomW, roomH)
+			digged = r.tryPlaceRoom(x, y, vx, vy, roomW, roomH, roomId)
 			ind = (ind + 1) % len(*dirs)
 			if ind == startind && !digged {
 				return false

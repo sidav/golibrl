@@ -1,20 +1,24 @@
 package RBR_generator
 
 const (
-	TWALL = iota 
+	TWALL = iota
 	TFLOOR
-	TDOOR 
+	TDOOR
 )
 
 type tile struct {
 	tiletype byte
+	roomId   int
 }
 
 func (t *tile) toRune() rune {
 	switch t.tiletype {
-	case TFLOOR: return '.'
-	case TWALL: return '#'
-	case TDOOR: return '+'
+	case TFLOOR:
+		return '.'
+	case TWALL:
+		return '#'
+	case TDOOR:
+		return '+'
 	}
 	return '?'
 }
