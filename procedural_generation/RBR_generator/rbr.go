@@ -42,23 +42,11 @@ func (r *RBR) Init(w, h int) {
 }
 
 func (r *RBR) Generate() {
-	// place initial room
-	digged := false
-	for !digged {
 
-		x := rnd.RandInRange(r.MAX_RSIZE, r.mapw-r.MAX_RSIZE-r.MIN_RSIZE)
-		y := rnd.RandInRange(r.MAX_RSIZE, r.maph-r.MAX_RSIZE - r.MIN_RSIZE)
+	roomsPlaced, corrsPlaced := r.placeInitialLayout()
 
-		w := rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE)
-		h := rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE)
-		r.digSpace(x, y, w, h, 1)
-		digged = true 
-	}
-
-	roomsPlaced := 1
-	corrsPlaced := 0
 	currLoop := 0
-
+	digged := false 
 	for (roomsPlaced < r.MINROOMS || corrsPlaced < r.MINCORRS) && currLoop < r.PLACEMENT_TRIES_LIMIT {
 		placementFromX, placementfromY := 0, 0 
 		placementToX, placementToY := r.mapw, r.maph
