@@ -29,13 +29,15 @@ func (r *RBR) Init(w, h int) {
 	r.MAX_RSIZE = 10 // r.mapw / 10
 
 
-	r.MINROOMS = 30
-	r.MINCORRS = 50
+	// r.MINROOMS = 30
+	// r.MINCORRS = 50
 
 	mapArea := r.mapw * r.maph
 	maxRoomArea := r.MAX_RSIZE*r.MAX_RSIZE
-	r.MINROOMS = mapArea / (maxRoomArea)
-	mapArea -= r.MINROOMS * maxRoomArea
+	minRoomArea := r.MIN_RSIZE*r.MIN_RSIZE
+	meanRoomArea := (3*maxRoomArea+minRoomArea)/4
+	r.MINROOMS = mapArea / (meanRoomArea)
+	mapArea -= r.MINROOMS * meanRoomArea
 	r.MINCORRS = r.MINROOMS // mapArea / (r.MAX_CLENGTH) + 200 
 
 	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 100

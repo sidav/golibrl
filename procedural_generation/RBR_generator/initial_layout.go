@@ -2,10 +2,14 @@ package RBR_generator
 
 // returns number of rooms and corridors placed.
 func (r *RBR) placeInitialLayout() (int, int) {
-	// r.placeInitialSingleRoom()
-	corridorRings := rnd.RandInRange(1, 5)
-	for i := 0; i < corridorRings; i++ {
-		r.placeInitialCorridorRing()
+	layout := rnd.RandInRange(0, 1)
+	switch layout {
+	case 0:
+		corridorRings := rnd.RandInRange(1, 5)
+		r.placeInitialCorridorRings(corridorRings)
+	default:
+		r.placeInitialSingleRoom()
+
 	}
 	return 0, 4
 }
@@ -24,16 +28,18 @@ func (r *RBR) placeInitialSingleRoom() {
 	}
 }
 
-func (r *RBR) placeInitialCorridorRing() {
-	x, y := rnd.RandInRange(1, r.mapw-r.MIN_RSIZE-1), rnd.RandInRange(1, r.maph-r.MIN_RSIZE-1)
-	w, h := rnd.RandInRange(r.MIN_RSIZE, r.mapw-x-2), rnd.RandInRange(r.MIN_RSIZE, r.maph-y-2)
+func (r *RBR) placeInitialCorridorRings(number int) {
+	for i := 0; i < number; i++ {
+		x, y := rnd.RandInRange(1, r.mapw-r.MIN_RSIZE-1), rnd.RandInRange(1, r.maph-r.MIN_RSIZE-1)
+		w, h := rnd.RandInRange(r.MIN_RSIZE, r.mapw-x-2), rnd.RandInRange(r.MIN_RSIZE, r.maph-y-2)
 
-	for cx := x; cx <= x+w; cx++ {
-		for cy := y; cy <= y+h; cy++ {
-			r.digSpace(cx, y, 1, 1, 0)
-			r.digSpace(cx, y+h, 1, 1, 0)
-			r.digSpace(x, cy, 1, 1, 0)
-			r.digSpace(x+w, cy, 1, 1, 0)
+		for cx := x; cx <= x+w; cx++ {
+			for cy := y; cy <= y+h; cy++ {
+				r.digSpace(cx, y, 1, 1, 0)
+				r.digSpace(cx, y+h, 1, 1, 0)
+				r.digSpace(x, cy, 1, 1, 0)
+				r.digSpace(x+w, cy, 1, 1, 0)
+			}
 		}
 	}
 }
