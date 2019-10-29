@@ -10,6 +10,7 @@ type RBR struct {
 	MINROOMS, MINCORRS       int
 	PLACEMENT_TRIES_LIMIT    int
 	VAULTS_NUM               int
+	numPlacedVaults          int
 }
 
 var rnd additive_random.FibRandom
@@ -31,7 +32,7 @@ func (r *RBR) Init(w, h int) {
 	r.MAX_CLENGTH = r.mapw - 2
 	r.MIN_RSIZE = 3
 	r.MAX_RSIZE = 10 // r.mapw / 10
-	r.VAULTS_NUM = len(vaults)
+	r.VAULTS_NUM = len(vaults)/2
 
 	// r.MINROOMS = 30
 	// r.MINCORRS = 50
@@ -91,7 +92,7 @@ func (r *RBR) Generate() {
 	}
 	r.placeRandomDoors(rnd.Rand(r.MINROOMS / 5))
 
-	for i := 0; i < r.VAULTS_NUM; i++ {
+	for i := r.numPlacedVaults; i < r.VAULTS_NUM; i++ {
 		r.placeRandomVault()
 	}
 }

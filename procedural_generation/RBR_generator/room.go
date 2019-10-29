@@ -65,6 +65,7 @@ finding_place:
 				r.digSpace(x, y, roomW, roomH, roomId)
 				r.tiles[jx][jy].tiletype = TDOOR
 				placeFound = true 
+				r.tryPlaceVaultOfGivenSizeAtCoords(x+1, y+1, roomW-2, roomH-2)
 				break finding_place
 			}
 			currCoordIndex = (currCoordIndex+1) % len(*coordsList)
