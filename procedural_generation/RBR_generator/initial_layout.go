@@ -2,36 +2,64 @@ package RBR_generator
 
 // returns number of rooms and corridors placed.
 func (r *RBR) placeInitialLayout() (int, int) {
-	layout := rnd.RandInRange(0, 1)
+	layout := rnd.RandInRange(0, 2)
+	layout = 1
+	rooms, corrs := 0, 0
 	switch layout {
 	case 0:
 		corridorRings := rnd.RandInRange(1, 5)
-		r.placeInitialCorridorRings(corridorRings)
+		rooms, corrs = r.placeInitialCorridorRings(corridorRings)
+	case 1:
+		rooms, corrs = r.placeInitialTwoInterconnectedRooms()
 	default:
-		r.placeInitialSingleRoom()
-
+		rooms, corrs = r.placeInitialLargeRoom()
 	}
-	return 0, 4
+	return rooms, corrs
 }
 
-func (r *RBR) placeInitialSingleRoom() {
+func (r *RBR) placeInitialLargeRoom() (int, int) {
 	digged := false
 	for !digged {
 
-		x := rnd.RandInRange(r.MAX_RSIZE, r.mapw-r.MAX_RSIZE-r.MIN_RSIZE)
-		y := rnd.RandInRange(r.MAX_RSIZE, r.maph-r.MAX_RSIZE-r.MIN_RSIZE)
-
-		w := rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE)
-		h := rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE)
+		x := rnd.RandInRange(3, r.mapw/2)
+		y := rnd.RandInRange(r.maph/4, r.maph/2)
+		w := r.mapw - x - x - 2 // WARNING: violates room size constraints!
+		h := rnd.RandInRange(r.maph/5, r.maph/2-1)
 		r.digSpace(x, y, w, h, 1)
 		digged = true
 	}
+	return 1, 0
 }
 
-func (r *RBR) placeInitialCorridorRings(number int) {
+func (r *RBR) placeInitialTwoInterconnectedRooms() (int, int) {
+	w1 := rnd.RandInRange(r.MAX_RSIZE/2, r.MAX_RSIZE)
+	w2 := w1 // rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE)
+	x1 := rnd.RandInRange(1, r.mapw/2-w1)
+	x2 := r.mapw - x1 - w2 // rnd.RandInRange(r.mapw/2, r.mapw-w2)
+	h := rnd.RandInRange(r.MAX_RSIZE/2, r.MAX_RSIZE)
+	y := rnd.RandInRange(r.maph/4, 3*r.maph/4-h)
+	r.digSpace(x1, y, w1, h, 0)
+	r.digSpace(x2, y, w2, h, 1)
+	corridors := rnd.RandInRange(1, h/3)
+	if corridors < 1 {
+		corridors = 1
+	}
+	for i := 0; i < corridors; i++ {
+		corrY := rnd.RandInRange(y, y+h-1)
+		r.digSpace(x1+w1, corrY, x2-x1-w1, 1, 1)
+	}
+	return 2, corridors
+}
+
+func (r *RBR) placeInitialCorridorRings(number int) (int, int) {
 	for i := 0; i < number; i++ {
 		x, y := rnd.RandInRange(1, r.mapw-r.MIN_RSIZE-1), rnd.RandInRange(1, r.maph-r.MIN_RSIZE-1)
 		w, h := rnd.RandInRange(r.MIN_RSIZE, r.mapw-x-2), rnd.RandInRange(r.MIN_RSIZE, r.maph-y-2)
+		if i == 0 {
+			// The first corridor ring SHOULD cover the most of the map to maximize map space usage.
+			x, y = rnd.RandInRange(1, r.MAX_RSIZE), rnd.RandInRange(1, r.MAX_RSIZE)
+			w, h = rnd.RandInRange(r.mapw/2, r.mapw-x-2), rnd.RandInRange(r.maph/2, r.maph-y-2)
+		}
 
 		for cx := x; cx <= x+w; cx++ {
 			for cy := y; cy <= y+h; cy++ {
@@ -42,4 +70,5 @@ func (r *RBR) placeInitialCorridorRings(number int) {
 			}
 		}
 	}
+	return 0, number * 4
 }
