@@ -20,7 +20,6 @@ func ( r* RBR) placeRandomDoors(doorsNum int) {
 			return 
 		}
 		coords := suitableDoorCoords[rnd.Rand(len(suitableDoorCoords))]
-		r.tiles[0][0].tiletype = TDOOR
 		r.placeDoorIfNeeded(coords[0], coords[1])
 	}
 }
