@@ -74,7 +74,7 @@ func (r *RBR) placeInitialFourInterconnectedRooms() (int, int) {
 		r.digSpace(x1+w, r.maph-corrY-1, x2-x1-w, 1, 0)
 		corrX := rnd.RandInRange(x1, x1+w-1)
 		r.digSpace(corrX, y1+h, 1, y2-y1-h, 0)
-		r.digSpace(r.mapw-corrX, y1+h, 1, y2-y1-h, 0)
+		r.digSpace(r.mapw-corrX-1, y1+h, 1, y2-y1-h, 0)
 	}
 	return 4, 4 * corridors
 }
