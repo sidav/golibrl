@@ -18,9 +18,9 @@ func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int, forceNoDeadend
 		// check if the end is not diagonally aligned to a floor
 		corrEndX, corrEndY := x-dirx+length*dirx, y-diry+length*diry
 
-		// nect condition is used to reduce creating of corridors that can't lead to a newly placed room even theoretically. 
-		if corrEndX < 2*r.MIN_RSIZE || corrEndX > r.mapw - 2*r.MIN_RSIZE || corrEndY < 2*r.MIN_RSIZE || corrEndY > r.maph - 2*r.MIN_RSIZE {
-			return false 
+		// nect condition is used to reduce creating of corridors that can't lead to a newly placed room even theoretically.
+		if corrEndX < 2*r.MIN_RSIZE || corrEndX > r.mapw-2*r.MIN_RSIZE || corrEndY < 2*r.MIN_RSIZE || corrEndY > r.maph-2*r.MIN_RSIZE {
+			return false
 		}
 
 		if forceNoDeadend {
@@ -29,7 +29,7 @@ func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int, forceNoDeadend
 				return true
 			}
 		} else {
-			if r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, false) > 0 || 
+			if r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, false) > 0 ||
 				r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, true) == 0 {
 				r.digSpace(x, y, w, h, 0)
 				return true
@@ -58,6 +58,10 @@ func (r *RBR) placeCorridorFrom(x, y int, forceNoDeadend bool) bool {
 		for lenTry := 0; lenTry < r.MAX_CLENGTH; lenTry++ {
 			digged = r.digCorridorIfPossible(x, y, vx, vy, corrLength, forceNoDeadend)
 			if digged || corrLength == r.MIN_CLENGTH {
+				if digged {
+					endDoorLocationX, endDoorLocationY := x+vx*corrLength-vx, y+vy*corrLength-vy
+					r.placeDoorIfNeeded(endDoorLocationX, endDoorLocationY)
+				}
 				break
 			}
 			corrLength--
@@ -67,6 +71,6 @@ func (r *RBR) placeCorridorFrom(x, y int, forceNoDeadend bool) bool {
 			return false
 		}
 	}
-	r.placeDoorIfNeeded(x, y)
+	r.placeDoorIfNeeded(x, y) // place a door on the starting tile
 	return true
 }
