@@ -7,6 +7,7 @@ import "strings"
 var vaults [][]string
 
 func readVaultsFromFile(path string) {
+	vaults = make([][]string, 0)
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -40,16 +41,16 @@ func vaultSymbolToTileType(symbol rune) byte {
 	case '.':
 		return TFLOOR
 	default:
-		return TDOOR
+		return TUNKNOWN
 	}
 }
 
 func (r *RBR) tryPlaceVaultAtCoords(vault *[]string, x, y int) {
-	for row := 0; row < len(*vault); row++ {
-		for col := 0; col < len((*vault)[row]); col++ {
-			symbol := rune((*vault)[row][col])
+	for column := 0; column < len(*vault); column++ {
+		for row := 0; row < len((*vault)[column]); row++ {
+			symbol := rune((*vault)[column][row])
 			ttype := vaultSymbolToTileType(symbol)
-			r.tiles[x+row][y+col].tiletype = ttype
+			r.tiles[x+row][y+column].tiletype = ttype
 		}
 	}
 }
@@ -73,15 +74,15 @@ func (r *RBR) placeRandomVault() {
 	tries := 0
 	for tries < len(vaults) {
 		vault := &vaults[rnd.Rand(len(vaults))]
-		h, w := len(*vault), len((*vault)[0])
-		coordsList := r.pickListOfCoordinatesForVaultToBeFit(w+1, h+1)
+		w, h := len(*vault), len((*vault)[0])
+		coordsList := r.pickListOfCoordinatesForVaultToBeFit(w, h)
 		if coordsList == nil {
 			tries++
 			continue
 		}
 		r.tiles[0][0].tiletype = TDOOR
 		coords := (*coordsList)[rnd.Rand(len(*coordsList))]
-		r.tryPlaceVaultAtCoords(vault, coords[0]+1, coords[1]+1)
+		r.tryPlaceVaultAtCoords(vault, coords[0], coords[1])
 		break
 	}
 }

@@ -4,6 +4,7 @@ const (
 	TWALL = iota
 	TFLOOR
 	TDOOR
+	TUNKNOWN
 )
 
 type tile struct {

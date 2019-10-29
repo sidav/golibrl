@@ -46,7 +46,7 @@ func (r *RBR) placeRoomFromJunction(x, y, roomId int) bool {
 func (r *RBR) placeRoomByPicking(roomId int, deadendOnly bool) bool {
 	placeFound := false
 	tries := 0 
-	maxtries := r.MAX_RSIZE * r.MAX_RSIZE - r.MIN_RSIZE*r.MIN_RSIZE
+	maxtries := 1 // Not needed? // r.MAX_RSIZE * r.MAX_RSIZE - r.MIN_RSIZE*r.MIN_RSIZE
 finding_place:
 	for tries < maxtries {
 		tries++
