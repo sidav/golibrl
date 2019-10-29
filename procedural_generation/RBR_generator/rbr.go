@@ -36,9 +36,9 @@ func (r *RBR) Init(w, h int) {
 	maxRoomArea := r.MAX_RSIZE*r.MAX_RSIZE
 	minRoomArea := r.MIN_RSIZE*r.MIN_RSIZE
 	meanRoomArea := (3*maxRoomArea+minRoomArea)/4
-	r.MINROOMS = mapArea / (meanRoomArea)
+	r.MINROOMS = mapArea / (3* meanRoomArea / 2)
 	mapArea -= r.MINROOMS * meanRoomArea
-	r.MINCORRS = r.MINROOMS // mapArea / (r.MAX_CLENGTH) + 200 
+	r.MINCORRS = mapArea / (r.MIN_CLENGTH*10)
 
 	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 100
 }
@@ -85,6 +85,7 @@ func (r *RBR) Generate() {
 		}
 		currLoop++
 	}
+	r.placeRandomDoors(rnd.Rand(r.MINROOMS/5))
 }
 
 ///////////////////////////////////////////////////////////////////

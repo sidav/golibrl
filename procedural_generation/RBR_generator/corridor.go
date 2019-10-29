@@ -58,7 +58,8 @@ func (r *RBR) placeCorridorFrom(x, y int, forceNoDeadend bool) bool {
 		for lenTry := 0; lenTry < r.MAX_CLENGTH; lenTry++ {
 			digged = r.digCorridorIfPossible(x, y, vx, vy, corrLength, forceNoDeadend)
 			if digged || corrLength == r.MIN_CLENGTH {
-				if digged {
+				if digged && corrLength > 3 {
+					// place a door at the ending tile 
 					endDoorLocationX, endDoorLocationY := x+vx*corrLength-vx, y+vy*corrLength-vy
 					r.placeDoorIfNeeded(endDoorLocationX, endDoorLocationY)
 				}
