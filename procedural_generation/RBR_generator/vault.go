@@ -1,13 +1,72 @@
 package RBR_generator
 
-import "os"
-import "bufio"
-import "strings"
+import (
+	"bufio"
+	"os"
+	"strings"
+)
 
-var vaults [][]string
+var vaults []*vault
+
+type vault struct {
+	strings []string
+}
+
+func reverseString(s string) (result string) {
+	for _, v := range s {
+		result = string(v) + result
+	}
+	return
+}
+
+func getRotatedStringArray(arr *[]string) *[]string { // rotates 90 degrees clockwise
+	newArr := make([]string, 0)
+	for i := 0; i < len((*arr)[0]); i++ {
+		str := ""
+		for j := 0; j < len(*arr); j++ {
+			str += string((*arr)[j][i])
+		}
+		newArr = append(newArr, str)
+	}
+	return &newArr
+}
+
+func getMirroredStringArray(arr *[]string, v, h bool) *[]string {
+	newArr := make([]string, 0)
+	if v && h {
+		for i := len(*arr) - 1; i >= 0; i-- {
+			newArr = append(newArr, reverseString((*arr)[i]))
+		}
+		return &newArr
+	}
+	if v {
+		for i := len(*arr) - 1; i >= 0; i-- {
+			newArr = append(newArr, (*arr)[i])
+		}
+		return &newArr
+	}
+	if h {
+		for i := 0; i < len(*arr); i++ {
+			newArr = append(newArr, reverseString((*arr)[i]))
+		}
+		return &newArr
+	}
+	return arr // nil
+}
+
+func (v *vault) getStrings() *[]string { // randomly rotates and/or mirrors the vault 
+	rotations := rnd.RandInRange(0, 3)
+	vMirror := rnd.Rand(2) == 0
+	hMirror := rnd.Rand(2) == 0
+	result := getMirroredStringArray(&v.strings, vMirror, hMirror)
+	for i := 1; i <= rotations; i++ {
+		result = getRotatedStringArray(result)
+	}
+	return result 
+}
 
 func readVaultsFromFile(path string) {
-	vaults = make([][]string, 0)
+	vaults = make([]*vault, 0)
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -20,7 +79,7 @@ func readVaultsFromFile(path string) {
 		line := scanner.Text()
 		if line == "" || strings.Contains(line, "//") {
 			if len(vaultLines) > 0 {
-				vaults = append(vaults, vaultLines)
+				vaults = append(vaults, &vault{strings: vaultLines})
 				vaultLines = make([]string, 0)
 			}
 		} else {
@@ -28,7 +87,7 @@ func readVaultsFromFile(path string) {
 		}
 	}
 	if len(vaultLines) > 0 {
-		vaults = append(vaults, vaultLines)
+		vaults = append(vaults, &vault{strings: vaultLines})
 	}
 }
 
@@ -42,47 +101,5 @@ func vaultSymbolToTileType(symbol rune) byte {
 		return TFLOOR
 	default:
 		return TUNKNOWN
-	}
-}
-
-func (r *RBR) tryPlaceVaultAtCoords(vault *[]string, x, y int) {
-	for column := 0; column < len(*vault); column++ {
-		for row := 0; row < len((*vault)[column]); row++ {
-			symbol := rune((*vault)[column][row])
-			ttype := vaultSymbolToTileType(symbol)
-			r.tiles[x+row][y+column].tiletype = ttype
-		}
-	}
-}
-
-func (r *RBR) pickListOfCoordinatesForVaultToBeFit(w, h int) *[][]int {
-	listOfPotentiallyAppropriateCoords := make([][]int, 0)
-	for x := 2; x+w < r.mapw-1; x++ {
-		for y := 2; y+h < r.maph-1; y++ {
-			if r.isSpaceOfGivenType(x, y, w, h, 1, TFLOOR) {
-				listOfPotentiallyAppropriateCoords = append(listOfPotentiallyAppropriateCoords, []int{x, y})
-			}
-		}
-	}
-	if len(listOfPotentiallyAppropriateCoords) == 0 {
-		return nil
-	}
-	return &listOfPotentiallyAppropriateCoords
-}
-
-func (r *RBR) placeRandomVault() {
-	tries := 0
-	for tries < len(vaults) {
-		vault := &vaults[rnd.Rand(len(vaults))]
-		w, h := len(*vault), len((*vault)[0])
-		coordsList := r.pickListOfCoordinatesForVaultToBeFit(w, h)
-		if coordsList == nil {
-			tries++
-			continue
-		}
-		r.tiles[0][0].tiletype = TDOOR
-		coords := (*coordsList)[rnd.Rand(len(*coordsList))]
-		r.tryPlaceVaultAtCoords(vault, coords[0], coords[1])
-		break
 	}
 }
