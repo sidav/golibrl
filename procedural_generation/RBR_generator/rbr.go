@@ -66,11 +66,13 @@ func (r *RBR) Generate() {
 		placeOnDeadendOnly := rnd.RandInRange(0, 2) != 0  
 		x, y := r.pickJunctionTile(placementFromX, placementfromY, placementToX, placementToY, placeOnDeadendOnly)
 		if x == -1 && y == -1 {
+			placeOnDeadendOnly = false 
 			x, y = r.pickJunctionTile(placementFromX, placementfromY, placementToX, placementToY, false)
 		}
 
 		if placeRoom {
-			digged = r.placeRoomFromJunction(x, y, roomsPlaced+1)
+			// digged = r.placeRoomFromJunction(x, y, roomsPlaced+1)
+			digged = r.placeRoomByPicking(roomsPlaced+1, false)
 			if digged {
 				roomsPlaced++
 			}

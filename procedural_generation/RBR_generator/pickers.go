@@ -52,20 +52,47 @@ func (r *RBR) pickJunctionTile(fromx, fromy, tox, toy int, deadendOnly bool) (in
 	return listOfAppropriateCoords[indx][0], listOfAppropriateCoords[indx][1]
 }
 
-// func (r *RBR) pickJunctionTileForRoom(rx, ry, w, h int) (int, int) {
-// 	listOfAppropriateCoords := make([][]int, 0)
-// 	for x := rx - 1; x <= rx+w; x++ {
-// 		for y := ry - 1; y <= ry+h; y++ {
-// 			if (x == rx-1 || x == rx+w) && (y == ry-1 || y == ry+h) {
-// 				if r.isTileSuitableForJunction(x, y, false) {
-// 					listOfAppropriateCoords = append(listOfAppropriateCoords, []int{x,y})
-// 				}
-// 			}
-// 		}
-// 	}
-// 	if len(listOfAppropriateCoords) == 0 {
-// 		return -1, -1 
-// 	}
-// 	coord := listOfAppropriateCoords[rnd.Rand(len(listOfAppropriateCoords))] 
-// 	return coord[0], coord[1]
-// }
+// Experimental:
+
+func (r *RBR) pickJunctionTileForPotentialRoom(rx, ry, w, h int, deadendOnly bool) (int, int) {
+	listOfAppropriateCoords := make([][]int, 0)
+	for x := rx; x < rx+w; x++ {
+		if r.isTileSuitableForJunction(x, ry-1, deadendOnly) {
+			listOfAppropriateCoords = append(listOfAppropriateCoords, []int{x,ry-1})
+		}
+		if r.isTileSuitableForJunction(x, ry+h, deadendOnly) {
+			listOfAppropriateCoords = append(listOfAppropriateCoords, []int{x,ry+h})
+		}
+	}
+	for y := ry; y < ry+h; y++ {
+		if r.isTileSuitableForJunction(rx-1, y, deadendOnly) {
+			listOfAppropriateCoords = append(listOfAppropriateCoords, []int{rx-1, y})
+		}
+		if r.isTileSuitableForJunction(rx+w, y, deadendOnly) {
+			listOfAppropriateCoords = append(listOfAppropriateCoords, []int{rx+w, y})
+		}
+	}
+
+	if len(listOfAppropriateCoords) == 0 {
+		return -1, -1 
+	}
+	coord := listOfAppropriateCoords[rnd.Rand(len(listOfAppropriateCoords))] 
+	return coord[0], coord[1]
+}
+
+func (r *RBR) pickListOfCoordinatesForRoomToBeFit(w, h int) *[][]int {
+	listOfPotentiallyAppropriateCoords := make([][]int, 0)
+	for x := 2; x+w<r.mapw-1; x++ {
+		for y := 2; y+h < r.maph-1; y++ {
+			if r.isSpaceOfGivenType(x, y, w, h, 1, TWALL) {
+				listOfPotentiallyAppropriateCoords = append(listOfPotentiallyAppropriateCoords, []int{x, y})
+			}
+		}
+	}
+	if len(listOfPotentiallyAppropriateCoords) == 0 {
+		return nil 
+	}
+	return &listOfPotentiallyAppropriateCoords
+}
+
+
