@@ -17,20 +17,36 @@ func (r *RBR) tryPlaceVaultOfGivenSizeAtCoords(x, y, w, h int) {
 		if v.isOfSize(w, h) {
 			vaultsOfSize = append(vaultsOfSize, v)
 		}
+		if w > h && w >= 5 && v.isOfSize(w-2, h){
+			vaultsOfSize = append(vaultsOfSize, v)
+		}
+		if h > w && h >= 5 && v.isOfSize(w, h-2){
+			vaultsOfSize = append(vaultsOfSize, v)
+		}
 	}
 	if len(vaultsOfSize) == 0 {
 		return
 	}
 	r.tiles[0][0].tiletype = TDOOR
 	vlt := vaultsOfSize[rnd.Rand(len(vaultsOfSize))]
-	r.tryPlaceVaultAtCoords(vlt.getStringsIfFitInSize(w, h), x, y)
+	vltStrings := vlt.getStringsIfFitInSize(w, h)
+	placeX, placeY := x, y 
+	if vltStrings == nil {
+		vltStrings = vlt.getStringsIfFitInSize(w-2, h)
+		placeX, placeY = x+1, y 
+		if vltStrings == nil {
+			vltStrings = vlt.getStringsIfFitInSize(w, h-2)
+			placeX, placeY = x, y+1
+		}
+	}
+	r.tryPlaceVaultAtCoords(vltStrings, placeX, placeY)
 }
 
 func (r *RBR) pickListOfCoordinatesForVaultToBeFit(w, h int) *[][]int {
 	listOfPotentiallyAppropriateCoords := make([][]int, 0)
 	for x := 2; x+w < r.mapw-1; x++ {
 		for y := 2; y+h < r.maph-1; y++ {
-			if r.isSpaceOfGivenType(x, y, w, h, 1, TFLOOR) && !r.isSpaceOfGivenType(x, y, w, h, 2, TFLOOR) {
+			if r.isSpaceOfGivenType(x, y, w, h, 1, TFLOOR) { // && !r.isSpaceOfGivenType(x, y, w, h, 2, TFLOOR) {
 				listOfPotentiallyAppropriateCoords = append(listOfPotentiallyAppropriateCoords, []int{x, y})
 			}
 		}
