@@ -15,7 +15,7 @@ func (r *RBR) tryPlaceVaultAtCoords(vaultString *[]string, x, y int) {
 
 func (r *RBR) tryPlaceVaultOfGivenSizeAtCoords(x, y, w, h int) {
 	vaultsOfSize := make([]*vault, 0)
-	for _, v := range vaults {
+	for _, v := range r.vaults {
 		if v.isOfSize(w, h) {
 			vaultsOfSize = append(vaultsOfSize, v)
 		}
@@ -61,8 +61,8 @@ func (r *RBR) pickListOfCoordinatesForVaultToBeFit(w, h int) *[][]int {
 
 func (r *RBR) placeRandomVault() {
 	tries := 0
-	for tries < len(vaults) {
-		vaultStrs := vaults[rnd.Rand(len(vaults))].getStrings()
+	for tries < len(r.vaults) {
+		vaultStrs := r.getRandomVault().getStrings()
 		h, w := len(*vaultStrs), len((*vaultStrs)[0])
 		coordsList := r.pickListOfCoordinatesForVaultToBeFit(w, h)
 		if coordsList == nil {

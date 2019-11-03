@@ -3,8 +3,8 @@ package RBR_generator
 func (r *RBR) pickListOfCoordinatesForGivenVaultToBeFit(vaultstrs *[]string) *[][]int {
 	h, w := len(*vaultstrs), len((*vaultstrs)[0])
 	listOfPotentiallyAppropriateCoords := make([][]int, 0)
-global:
 	for x := 2; x+w < r.mapw-1; x++ {
+global:
 		for y := 2; y+h < r.maph-1; y++ {
 			for vx := 0; vx < w; vx++ {
 				for vy := 0; vy < h; vy++ {
@@ -56,9 +56,10 @@ func (r *RBR) placeRoomvaultByPicking(roomId int, deadendOnly bool) bool {
 finding_place:
 	for tries < maxtries {
 		tries++
-		vaultstrs := vaults[rnd.Rand(len(vaults))].getStrings()
+		vaultstrs := r.getRandomRoomvault().getStrings()
 		roomH, roomW := len(*vaultstrs), len((*vaultstrs)[0])
-		coordsList := r.pickListOfCoordinatesForGivenVaultToBeFit(vaultstrs)
+		coordsList := r.pickListOfCoordinatesForRoomToBeFit(roomW, roomH)
+		// coordsList := r.pickListOfCoordinatesForGivenVaultToBeFit(vaultstrs)
 		if coordsList == nil {
 			continue finding_place
 		}
