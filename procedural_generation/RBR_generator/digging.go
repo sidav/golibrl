@@ -19,6 +19,24 @@ func (r *RBR) digSpace(x, y, w, h, roomId int) {
 	}
 }
 
+func (r *RBR) setRoomIdForTilesRectangle(x, y, w, h, roomId int) {
+	if w < 0 {
+		x = x + w + 1
+		w = -w
+	}
+	if h < 0 {
+		y = y + h + 1
+		h = -h
+	}
+	for cx := x; cx < x+w; cx++ {
+		for cy := y; cy < y+h; cy++ {
+			if cx*cy != 0 && cx < r.mapw-1 && cy < r.maph-1 { // restrict digging close to map end 
+				r.tiles[cx][cy].roomId = roomId
+			}
+		}
+	}
+}
+
 func (r *RBR) countTiletypesAround(ttype byte, x, y int, diagonals bool) int {
 	ttypes := 0
 	for vx := -1; vx <= 1; vx++ {

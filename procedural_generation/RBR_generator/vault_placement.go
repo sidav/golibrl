@@ -4,10 +4,12 @@ func (r *RBR) tryPlaceVaultAtCoords(vaultString *[]string, x, y int) {
 	for column := 0; column < len(*vaultString); column++ {
 		for row := 0; row < len((*vaultString)[column]); row++ {
 			symbol := rune((*vaultString)[column][row])
-			ttype := vaultSymbolToTileType(symbol)
-			r.tiles[x+row][y+column].tiletype = ttype
-			r.numPlacedVaults++
+			if symbol != ' ' {
+				ttype := vaultSymbolToTileType(symbol)
+				r.tiles[x+row][y+column].tiletype = ttype
+			}
 		}
+		r.numPlacedVaults++
 	}
 }
 
@@ -17,10 +19,10 @@ func (r *RBR) tryPlaceVaultOfGivenSizeAtCoords(x, y, w, h int) {
 		if v.isOfSize(w, h) {
 			vaultsOfSize = append(vaultsOfSize, v)
 		}
-		if w > h && w >= 5 && v.isOfSize(w-2, h){
+		if w > h && w >= 5 && v.isOfSize(w-2, h) {
 			vaultsOfSize = append(vaultsOfSize, v)
 		}
-		if h > w && h >= 5 && v.isOfSize(w, h-2){
+		if h > w && h >= 5 && v.isOfSize(w, h-2) {
 			vaultsOfSize = append(vaultsOfSize, v)
 		}
 	}
@@ -30,10 +32,10 @@ func (r *RBR) tryPlaceVaultOfGivenSizeAtCoords(x, y, w, h int) {
 	r.tiles[0][0].tiletype = TDOOR
 	vlt := vaultsOfSize[rnd.Rand(len(vaultsOfSize))]
 	vltStrings := vlt.getStringsIfFitInSize(w, h)
-	placeX, placeY := x, y 
+	placeX, placeY := x, y
 	if vltStrings == nil {
 		vltStrings = vlt.getStringsIfFitInSize(w-2, h)
-		placeX, placeY = x+1, y 
+		placeX, placeY = x+1, y
 		if vltStrings == nil {
 			vltStrings = vlt.getStringsIfFitInSize(w, h-2)
 			placeX, placeY = x, y+1
