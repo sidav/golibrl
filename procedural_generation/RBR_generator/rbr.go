@@ -80,8 +80,9 @@ func (r *RBR) Generate() {
 
 		if placeRoom {
 			digged = false 
-			if rnd.Rand(2) == 1 {
-				digged = r.placeRoomByPicking(roomsPlaced+1, false)
+			if rnd.Rand(2) == 1 || r.numPlacedVaults >= r.VAULTS_NUM {
+				vaultNeeded := rnd.Rand(3) == 0
+				digged = r.placeRoomByPicking(roomsPlaced+1, false, vaultNeeded)
 			}  else {
 				digged = r.placeRoomvaultByPicking(roomsPlaced+1, false)
 			}

@@ -2,7 +2,7 @@ package RBR_generator
 
 // Experimental 
 
-func (r *RBR) placeRoomByPicking(roomId int, deadendOnly bool) bool {
+func (r *RBR) placeRoomByPicking(roomId int, deadendOnly, placeVault bool) bool {
 	placeFound := false
 	tries := 0 
 	maxtries := 1 // Not needed? // r.MAX_RSIZE * r.MAX_RSIZE - r.MIN_RSIZE*r.MIN_RSIZE

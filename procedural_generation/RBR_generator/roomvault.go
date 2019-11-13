@@ -72,8 +72,8 @@ finding_place:
 			if jx != -1 && jy != -1 {
 				r.tiles[jx][jy].tiletype = TDOOR
 				placeFound = true
-				r.tryPlaceVaultAtCoords(vaultstrs, x, y)
-				r.setRoomIdForTilesRectangle(x, y, roomW, roomH, roomId)
+				r.tryPlaceVaultAtCoords(vaultstrs, x, y, roomId)
+				// r.setRoomIdForTilesRectangle(x, y, roomW, roomH, roomId)
 				break finding_place
 			}
 			currCoordIndex = (currCoordIndex + 1) % len(*coordsList)

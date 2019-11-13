@@ -12,8 +12,7 @@ func (r *RBR) digSpace(x, y, w, h, roomId int) {
 	for cx := x; cx < x+w; cx++ {
 		for cy := y; cy < y+h; cy++ {
 			if cx*cy != 0 && cx < r.mapw-1 && cy < r.maph-1 { // restrict digging close to map end 
-				r.tiles[cx][cy].tiletype = TFLOOR
-				r.tiles[cx][cy].roomId = roomId
+				r.tiles[cx][cy].setProperties(TFLOOR, roomId, -1)
 			}
 		}
 	}
@@ -84,11 +83,3 @@ func (r *RBR) isSpaceOfGivenType(x, y, w, h, outlineThickness int, ttype byte) b
 	}
 	return true
 }
-
-// func (r *RBR) digRoomIfPossible(x, y, w, h, oulinethick int) bool {
-// 	if r.isSpaceOfGivenType(x, y, w, h, 1, TWALL) {
-// 		r.digSpace(x, y, w, h)
-// 		return true
-// 	}
-// 	return false
-// }
