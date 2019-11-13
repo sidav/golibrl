@@ -23,7 +23,7 @@ func (r *RBR) placeInitialLargeRoom() (int, int) {
 	digged := false
 	for !digged {
 
-		x := rnd.RandInRange(3, r.mapw/2)
+		x := rnd.RandInRange(3, r.mapw/4)
 		y := rnd.RandInRange(r.maph/4, r.maph/2)
 		w := r.mapw - x - x - 2 // WARNING: violates room size constraints!
 		h := rnd.RandInRange(r.maph/5, r.maph/2-1)
