@@ -60,6 +60,7 @@ func (r *RBR) Generate() {
 	currLoop := 0
 	digged := false
 	increaseSecAreaEach := r.MINROOMS / r.NUM_SEC_AREAS
+	increaseSecAreaEach = rnd.RandInRange(increaseSecAreaEach-increaseSecAreaEach/2, increaseSecAreaEach+increaseSecAreaEach/2)
 	var currSecArea int16 = 0 
 
 	for (roomsPlaced < r.MINROOMS || corrsPlaced < r.MINCORRS) && currLoop < r.PLACEMENT_TRIES_LIMIT {
