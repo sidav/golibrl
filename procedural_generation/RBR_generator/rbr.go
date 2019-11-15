@@ -109,6 +109,7 @@ func (r *RBR) Generate() {
 	}
 	r.placeRandomDoors(rnd.Rand(r.MINROOMS / 5))
 	r.finalizeDoorsSecArea()
+	r.placeStairs(1, 2, true)
 	// for i := r.numPlacedVaults; i < r.VAULTS_NUM; i++ {
 	// 	r.placeRandomVault()
 	// }

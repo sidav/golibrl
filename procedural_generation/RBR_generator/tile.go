@@ -5,6 +5,8 @@ const (
 	TWALL uint8 = iota
 	TFLOOR
 	TDOOR
+	TNEXTLEVELSTAIR
+	TPREVLEVELSTAIR
 	TUNKNOWN
 
 	T_NOCHANGE 
@@ -34,6 +36,10 @@ func (t *tile) toRune() rune {
 		return '.'
 	case TWALL:
 		return '#'
+	case TNEXTLEVELSTAIR:
+		return '>'
+	case TPREVLEVELSTAIR:
+		return '<'
 	case TDOOR:
 		if t.secArea == 0 {
 		return '+'
