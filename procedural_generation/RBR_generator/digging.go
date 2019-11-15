@@ -1,6 +1,6 @@
 package RBR_generator
 
-func (r *RBR) digSpace(x, y, w, h, roomId int) {
+func (r *RBR) digSpace(x, y, w, h, roomId int, secArea int16) {
 	if w < 0 {
 		x = x + w + 1
 		w = -w
@@ -12,7 +12,7 @@ func (r *RBR) digSpace(x, y, w, h, roomId int) {
 	for cx := x; cx < x+w; cx++ {
 		for cy := y; cy < y+h; cy++ {
 			if cx*cy != 0 && cx < r.mapw-1 && cy < r.maph-1 { // restrict digging close to map end 
-				r.tiles[cx][cy].setProperties(TFLOOR, roomId, -1)
+				r.tiles[cx][cy].setProperties(TFLOOR, roomId, secArea)
 			}
 		}
 	}

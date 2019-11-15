@@ -1,4 +1,5 @@
 package RBR_generator
+import "strconv"
 
 const (
 	TWALL uint8 = iota
@@ -12,7 +13,7 @@ const (
 type tile struct {
 	tiletype byte
 	roomId   int
-	securityId int16 
+	secArea int16 
 }
 
 func (t *tile) setProperties(ttype uint8, roomId int, secId int16) {
@@ -23,7 +24,7 @@ func (t *tile) setProperties(ttype uint8, roomId int, secId int16) {
 		t.roomId = roomId
 	}
 	if secId != -1 {
-		t.securityId = secId 
+		t.secArea = secId 
 	}
 }
 
@@ -34,7 +35,11 @@ func (t *tile) toRune() rune {
 	case TWALL:
 		return '#'
 	case TDOOR:
+		if t.secArea == 0 {
 		return '+'
+		} else {
+			return rune(strconv.Itoa(int(t.secArea))[0]) //'\\'
+		}
 	}
 	return '?'
 }

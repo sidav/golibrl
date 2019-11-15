@@ -49,7 +49,7 @@ func (r *RBR) pickJunctionTileForVault(rx, ry int, vaultstrs *[]string, deadendO
 	return coord[0], coord[1]
 }
 
-func (r *RBR) placeRoomvaultByPicking(roomId int, deadendOnly bool) bool {
+func (r *RBR) placeRoomvaultByPicking(roomId int, secArea int16, deadendOnly bool) bool {
 	placeFound := false
 	tries := 0
 	maxtries := 1 // Not needed? // r.MAX_RSIZE * r.MAX_RSIZE - r.MIN_RSIZE*r.MIN_RSIZE
@@ -72,7 +72,7 @@ finding_place:
 			if jx != -1 && jy != -1 {
 				r.tiles[jx][jy].tiletype = TDOOR
 				placeFound = true
-				r.tryPlaceVaultAtCoords(vaultstrs, x, y, roomId)
+				r.tryPlaceVaultAtCoords(vaultstrs, x, y, roomId, secArea)
 				// r.setRoomIdForTilesRectangle(x, y, roomW, roomH, roomId)
 				break finding_place
 			}

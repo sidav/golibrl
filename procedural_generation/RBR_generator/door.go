@@ -2,11 +2,25 @@ package RBR_generator
 
 func (r *RBR) placeDoorIfNeeded(x, y int) {
 	if r.isTileAdjacentToDifferentRoomIDs(x, y) {
-		r.tiles[x][y].tiletype = TDOOR 
+		r.tiles[x][y].tiletype = TDOOR
 	}
 }
 
-func ( r* RBR) placeRandomDoors(doorsNum int) {
+func (r *RBR) finalizeDoorsSecArea() {
+	for x := 0; x < r.mapw; x++ {
+		for y := 0; y < r.maph; y++ {
+			if r.tiles[x][y].tiletype == TDOOR {
+				if r.isTileAdjacentToDifferentSecAreas(x, y) {
+					r.tiles[x][y].secArea = r.getHighestSecAreaNearTile(x, y)
+				} else {
+					r.tiles[x][y].secArea = 0 // don't lock doors which aren't connecting two sec areas
+				}
+			}
+		}
+	}
+}
+
+func (r *RBR) placeRandomDoors(doorsNum int) {
 	for door := 0; door < doorsNum; door++ {
 		suitableDoorCoords := make([][]int, 0)
 		for x := 1; x < r.mapw; x++ {
@@ -17,7 +31,7 @@ func ( r* RBR) placeRandomDoors(doorsNum int) {
 			}
 		}
 		if len(suitableDoorCoords) == 0 {
-			return 
+			return
 		}
 		coords := suitableDoorCoords[rnd.Rand(len(suitableDoorCoords))]
 		r.placeDoorIfNeeded(coords[0], coords[1])
@@ -25,19 +39,55 @@ func ( r* RBR) placeRandomDoors(doorsNum int) {
 }
 
 func (r *RBR) isTileAdjacentToDifferentRoomIDs(x, y int) bool {
-	currId := -1 
+	currId := -1
 	for vx := -1; vx <= 1; vx++ {
 		for vy := -1; vy <= 1; vy++ {
 			if x+vx < 0 || y+vy < 0 || x+vx >= r.mapw || y+vy >= r.maph {
 				continue
 			}
-			if vx != vy && vx*vy == 0 {
+			if vx != vy && vx*vy == 0 && r.tiles[x+vx][y+vy].tiletype != TWALL {
 				if currId == -1 {
 					currId = r.tiles[x+vx][y+vy].roomId
-					continue 
+					continue
 				}
 				if r.tiles[x+vx][y+vy].roomId != currId {
-					return true 
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func (r *RBR) getHighestSecAreaNearTile(x, y int) int16 {
+	var currSecArea int16 = 0
+	for vx := -1; vx <= 1; vx++ {
+		for vy := -1; vy <= 1; vy++ {
+			if x+vx < 0 || y+vy < 0 || x+vx >= r.mapw || y+vy >= r.maph {
+				continue
+			}
+			if vx != vy && vx*vy == 0 && r.tiles[x+vx][y+vy].secArea > currSecArea {
+				currSecArea++
+			}
+		}
+	}
+	return currSecArea
+}
+
+func (r *RBR) isTileAdjacentToDifferentSecAreas(x, y int) bool {
+	var currSecArea int16 = -1
+	for vx := -1; vx <= 1; vx++ {
+		for vy := -1; vy <= 1; vy++ {
+			if x+vx < 0 || y+vy < 0 || x+vx >= r.mapw || y+vy >= r.maph {
+				continue
+			}
+			if vx != vy && vx*vy == 0 && r.tiles[x+vx][y+vy].tiletype != TWALL {
+				if currSecArea == -1 {
+					currSecArea = r.tiles[x+vx][y+vy].secArea
+					continue
+				}
+				if r.tiles[x+vx][y+vy].secArea != currSecArea {
+					return true
 				}
 			}
 		}

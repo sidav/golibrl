@@ -2,7 +2,7 @@ package RBR_generator
 
 // Experimental 
 
-func (r *RBR) placeRoomByPicking(roomId int, deadendOnly, placeVault bool) bool {
+func (r *RBR) placeRoomByPicking(roomId int, secArea int16, deadendOnly, placeVault bool) bool {
 	placeFound := false
 	tries := 0 
 	maxtries := 1 // Not needed? // r.MAX_RSIZE * r.MAX_RSIZE - r.MIN_RSIZE*r.MIN_RSIZE
@@ -21,7 +21,7 @@ finding_place:
 			x, y := (*coordsList)[currCoordIndex][0], (*coordsList)[currCoordIndex][1]
 			jx, jy := r.pickJunctionTileForPotentialRoom(x, y, roomW, roomH, deadendOnly)
 			if jx != -1 && jy != -1 {
-				r.digSpace(x, y, roomW, roomH, roomId)
+				r.digSpace(x, y, roomW, roomH, roomId, secArea)
 				r.tiles[jx][jy].tiletype = TDOOR
 				placeFound = true 
 				r.tryPlaceVaultOfGivenSizeAtCoords(x+1, y+1, roomW-2, roomH-2)

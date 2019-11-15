@@ -1,6 +1,6 @@
 package RBR_generator
 
-func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int, forceNoDeadend bool) bool {
+func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int, secArea int16, forceNoDeadend bool) bool {
 	w := length * dirx
 	h := length * diry
 	// hdec and wdec are decrements in width and height of space checked for emptiness. Used for allowing the corridors end in other corridors and/or rooms.
@@ -25,13 +25,13 @@ func (r *RBR) digCorridorIfPossible(x, y, dirx, diry, length int, forceNoDeadend
 
 		if forceNoDeadend {
 			if r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, false) > 0 {
-				r.digSpace(x, y, w, h, 0)
+				r.digSpace(x, y, w, h, 0, secArea)
 				return true
 			}
 		} else {
 			if r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, false) > 0 ||
 				r.countTiletypesAround(TFLOOR, corrEndX, corrEndY, true) == 0 {
-				r.digSpace(x, y, w, h, 0)
+				r.digSpace(x, y, w, h, 0, secArea)
 				return true
 			}
 		}
@@ -54,13 +54,18 @@ func (r *RBR) placeCorridorFrom(x, y int, forceNoDeadend bool) bool {
 	for !digged {
 		vx, vy := (*dirs)[ind][0], (*dirs)[ind][1]
 		// try various lengths for each direction
-		corrLength := rnd.RandInRange(r.MIN_CLENGTH, r.MAX_CLENGTH)
+		corrLength := r.MAX_CLENGTH // rnd.RandInRange(r.MIN_CLENGTH, r.MAX_CLENGTH)
 		for lenTry := 0; lenTry < r.MAX_CLENGTH; lenTry++ {
-			digged = r.digCorridorIfPossible(x, y, vx, vy, corrLength, forceNoDeadend)
+			endDoorLocationX, endDoorLocationY := x+vx*corrLength-vx, y+vy*corrLength-vy
+			secArea := r.getHighestSecAreaNearTile(x, y)
+			secAreaEnd := r.getHighestSecAreaNearTile(endDoorLocationX, endDoorLocationY) 
+			if secArea > secAreaEnd {
+				secArea = secAreaEnd
+			} 
+			digged = r.digCorridorIfPossible(x, y, vx, vy, corrLength, secArea, forceNoDeadend)
 			if digged || corrLength == r.MIN_CLENGTH {
 				if digged && corrLength > 3 {
 					// place a door at the ending tile 
-					endDoorLocationX, endDoorLocationY := x+vx*corrLength-vx, y+vy*corrLength-vy
 					r.placeDoorIfNeeded(endDoorLocationX, endDoorLocationY)
 				}
 				break

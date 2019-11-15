@@ -1,12 +1,12 @@
 package RBR_generator
 
-func (r *RBR) tryPlaceVaultAtCoords(vaultString *[]string, x, y int, roomId int) {
+func (r *RBR) tryPlaceVaultAtCoords(vaultString *[]string, x, y int, roomId int, secArea int16) {
 	for column := 0; column < len(*vaultString); column++ {
 		for row := 0; row < len((*vaultString)[column]); row++ {
 			symbol := rune((*vaultString)[column][row])
 			if symbol != ' ' {
 				ttype := vaultSymbolToTileType(symbol)
-				r.tiles[x+row][y+column].setProperties(ttype, -1, -1)
+				r.tiles[x+row][y+column].setProperties(ttype, -1, secArea)
 			}
 		}
 		r.numPlacedVaults++
@@ -41,7 +41,9 @@ func (r *RBR) tryPlaceVaultOfGivenSizeAtCoords(x, y, w, h int) {
 			placeX, placeY = x, y+1
 		}
 	}
-	r.tryPlaceVaultAtCoords(vltStrings, placeX, placeY, -1)
+	secArea := r.tiles[placeX][placeY].secArea
+	roomId := r.tiles[placeX][placeY].roomId
+	r.tryPlaceVaultAtCoords(vltStrings, placeX, placeY, roomId, secArea)
 }
 
 func (r *RBR) pickListOfCoordinatesForVaultToBeFit(w, h int) *[][]int {
@@ -70,7 +72,9 @@ func (r *RBR) placeRandomVault() {
 			continue
 		}
 		coords := (*coordsList)[rnd.Rand(len(*coordsList))]
-		r.tryPlaceVaultAtCoords(vaultStrs, coords[0], coords[1], -1)
+		secArea := r.tiles[coords[0]][coords[1]].secArea
+		roomId := r.tiles[coords[0]][coords[1]].roomId
+		r.tryPlaceVaultAtCoords(vaultStrs, coords[0], coords[1], roomId, secArea)
 		break
 	}
 }

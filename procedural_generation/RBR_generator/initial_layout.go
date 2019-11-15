@@ -27,7 +27,7 @@ func (r *RBR) placeInitialLargeRoom() (int, int) {
 		y := rnd.RandInRange(r.maph/4, r.maph/2)
 		w := r.mapw - x - x - 2 // WARNING: violates room size constraints!
 		h := rnd.RandInRange(r.maph/5, r.maph/2-1)
-		r.digSpace(x, y, w, h, 1)
+		r.digSpace(x, y, w, h, 1, 0)
 		digged = true
 	}
 	return 1, 0
@@ -40,15 +40,15 @@ func (r *RBR) placeInitialTwoInterconnectedRooms() (int, int) {
 	x2 := r.mapw - x1 - w2 // rnd.RandInRange(r.mapw/2, r.mapw-w2)
 	h := rnd.RandInRange(r.MAX_RSIZE/2, r.MAX_RSIZE)
 	y := rnd.RandInRange(r.maph/4, 3*r.maph/4-h)
-	r.digSpace(x1, y, w1, h, 0)
-	r.digSpace(x2, y, w2, h, 1)
+	r.digSpace(x1, y, w1, h, 0, 0)
+	r.digSpace(x2, y, w2, h, 1, 0)
 	corridors := rnd.RandInRange(1, h/3)
 	if corridors < 1 {
 		corridors = 1
 	}
 	for i := 0; i < corridors; i++ {
 		corrY := rnd.RandInRange(y, y+h-1)
-		r.digSpace(x1+w1, corrY, x2-x1-w1, 1, 0)
+		r.digSpace(x1+w1, corrY, x2-x1-w1, 1, 0, 0)
 	}
 	return 2, corridors
 }
@@ -60,21 +60,21 @@ func (r *RBR) placeInitialFourInterconnectedRooms() (int, int) {
 	h := rnd.RandInRange(r.MAX_RSIZE/2, r.MAX_RSIZE)
 	y1 := rnd.RandInRange(1, r.maph/3)
 	y2 := r.maph - y1 - h 
-	r.digSpace(x1, y1, w, h, 1)
-	r.digSpace(x2, y1, w, h, 2)
-	r.digSpace(x1, y2, w, h, 3)
-	r.digSpace(x2, y2, w, h, 4)
+	r.digSpace(x1, y1, w, h, 1, 0)
+	r.digSpace(x2, y1, w, h, 2, 0)
+	r.digSpace(x1, y2, w, h, 3, 0)
+	r.digSpace(x2, y2, w, h, 4, 0)
 	corridors := rnd.RandInRange(1, h/3)
 	if corridors < 1 {
 		corridors = 1
 	}
 	for i := 0; i < corridors; i++ {
 		corrY := rnd.RandInRange(y1, y1+h-1)
-		r.digSpace(x1+w, corrY, x2-x1-w, 1, 0)
-		r.digSpace(x1+w, r.maph-corrY-1, x2-x1-w, 1, 0)
+		r.digSpace(x1+w, corrY, x2-x1-w, 1, 0, 0)
+		r.digSpace(x1+w, r.maph-corrY-1, x2-x1-w, 1, 0, 0)
 		corrX := rnd.RandInRange(x1, x1+w-1)
-		r.digSpace(corrX, y1+h, 1, y2-y1-h, 0)
-		r.digSpace(r.mapw-corrX-1, y1+h, 1, y2-y1-h, 0)
+		r.digSpace(corrX, y1+h, 1, y2-y1-h, 0, 0)
+		r.digSpace(r.mapw-corrX-1, y1+h, 1, y2-y1-h, 0, 0)
 	}
 	return 4, 4 * corridors
 }
@@ -91,10 +91,10 @@ func (r *RBR) placeInitialCorridorRings(number int) (int, int) {
 
 		for cx := x; cx <= x+w; cx++ {
 			for cy := y; cy <= y+h; cy++ {
-				r.digSpace(cx, y, 1, 1, 0)
-				r.digSpace(cx, y+h, 1, 1, 0)
-				r.digSpace(x, cy, 1, 1, 0)
-				r.digSpace(x+w, cy, 1, 1, 0)
+				r.digSpace(cx, y, 1, 1, 0, 0)
+				r.digSpace(cx, y+h, 1, 1, 0, 0)
+				r.digSpace(x, cy, 1, 1, 0, 0)
+				r.digSpace(x+w, cy, 1, 1, 0, 0)
 			}
 		}
 	}

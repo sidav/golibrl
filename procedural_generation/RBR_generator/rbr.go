@@ -12,6 +12,7 @@ type RBR struct {
 	VAULTS_NUM               int
 	numPlacedVaults          int
 	vaults, roomvaults       []*vault
+	NUM_SEC_AREAS            int 
 }
 
 var rnd additive_random.FibRandom
@@ -19,7 +20,7 @@ var rnd additive_random.FibRandom
 func (r *RBR) Init(w, h int) {
 	rnd = additive_random.FibRandom{}
 
-	r.readVaultsFromFile("procedural_generation/RBR_generator/vaults.txt") // TODO: custom vaults file. 
+	r.readVaultsFromFile("procedural_generation/RBR_generator/vaults.txt") // TODO: custom vaults file.
 	r.readRoomVaultsFromFile("procedural_generation/RBR_generator/roomvaults.txt")
 
 	rnd.InitBySeed(-1)
@@ -49,6 +50,7 @@ func (r *RBR) Init(w, h int) {
 	// r.MINCORRS = 0
 
 	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 100
+	r.NUM_SEC_AREAS = 2
 }
 
 func (r *RBR) Generate() {
@@ -57,7 +59,13 @@ func (r *RBR) Generate() {
 
 	currLoop := 0
 	digged := false
+	increaseSecAreaEach := r.MINROOMS / r.NUM_SEC_AREAS
+	var currSecArea int16 = 0 
+
 	for (roomsPlaced < r.MINROOMS || corrsPlaced < r.MINCORRS) && currLoop < r.PLACEMENT_TRIES_LIMIT {
+		if roomsPlaced%increaseSecAreaEach == 0 && int(currSecArea) < r.NUM_SEC_AREAS-1 {
+			currSecArea++
+		}
 		placementFromX, placementfromY := 0, 0
 		placementToX, placementToY := r.mapw, r.maph
 
@@ -79,12 +87,12 @@ func (r *RBR) Generate() {
 		}
 
 		if placeRoom {
-			digged = false 
+			digged = false
 			if rnd.Rand(2) == 1 || r.numPlacedVaults >= r.VAULTS_NUM {
 				vaultNeeded := rnd.Rand(3) == 0
-				digged = r.placeRoomByPicking(roomsPlaced+1, false, vaultNeeded)
-			}  else {
-				digged = r.placeRoomvaultByPicking(roomsPlaced+1, false)
+				digged = r.placeRoomByPicking(roomsPlaced+1, currSecArea, false, vaultNeeded)
+			} else {
+				digged = r.placeRoomvaultByPicking(roomsPlaced+1, currSecArea, false)
 			}
 			if digged {
 				roomsPlaced++
@@ -99,7 +107,7 @@ func (r *RBR) Generate() {
 		currLoop++
 	}
 	r.placeRandomDoors(rnd.Rand(r.MINROOMS / 5))
-
+	r.finalizeDoorsSecArea()
 	// for i := r.numPlacedVaults; i < r.VAULTS_NUM; i++ {
 	// 	r.placeRandomVault()
 	// }
