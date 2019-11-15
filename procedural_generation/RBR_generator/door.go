@@ -1,7 +1,7 @@
 package RBR_generator
 
 func (r *RBR) placeDoorIfNeeded(x, y int) {
-	if r.isTileAdjacentToDifferentRoomIDs(x, y) {
+	if r.isTileAdjacentToDifferentRoomIDs(x, y) || r.isTileAdjacentToDifferentSecAreas(x, y) {
 		r.tiles[x][y].tiletype = TDOOR
 	}
 }
