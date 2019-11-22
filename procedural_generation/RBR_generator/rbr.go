@@ -53,7 +53,7 @@ func (r *RBR) Init(w, h, secareas int, vaultsFilePath, roomvaultsFilePath string
 	meanRoomArea := (r.ROOM_SIZE_BIAS * r.ROOM_SIZE_BIAS)
 	r.MINROOMS = mapArea / (3 * meanRoomArea / 2)
 	mapArea -= r.MINROOMS * meanRoomArea
-	r.MINCORRS = mapArea / (r.MIN_CLENGTH * 20)
+	r.MINCORRS = mapArea / (r.maph)
 	// r.MINCORRS = 0
 
 	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 10
@@ -95,11 +95,6 @@ func (r *RBR) Generate() {
 		}
 
 		placeOnDeadendOnly := rnd.RandInRange(0, 2) != 0
-		x, y := r.pickJunctionTile(placementFromX, placementfromY, placementToX, placementToY, placeOnDeadendOnly)
-		if x == -1 && y == -1 {
-			placeOnDeadendOnly = false
-			x, y = r.pickJunctionTile(placementFromX, placementfromY, placementToX, placementToY, false)
-		}
 
 		if placeRoom {
 			digged = false
@@ -113,6 +108,11 @@ func (r *RBR) Generate() {
 				r.numPlacedRooms++
 			}
 		} else {
+			x, y := r.pickJunctionTile(placementFromX, placementfromY, placementToX, placementToY, placeOnDeadendOnly)
+			if x == -1 && y == -1 {
+				placeOnDeadendOnly = false
+				x, y = r.pickJunctionTile(placementFromX, placementfromY, placementToX, placementToY, false)
+			}
 			forceNotDeadendCorridor := r.numPlacedCorridors > r.MINCORRS/4 || r.numPlacedRooms > r.MINROOMS/2
 			digged = r.placeCorridorFrom(x, y, forceNotDeadendCorridor)
 			if digged {
