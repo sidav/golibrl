@@ -10,6 +10,7 @@ import (
 	"github.com/sidav/golibrl/fov/strict_definition_fov"
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
+	"github.com/sidav/golibrl/procedural_generation/RBR_generator"
 	"strconv"
 	"strings"
 	"time"
@@ -19,11 +20,13 @@ func main() {
 	console.Init_console("test", console.TCellRenderer)
 	defer console.Close_console()
 	key := ""
+	console.Clear_console()
 	for key != "ESCAPE" {
+		testRBR()
 		// angletest()
 		// testFractalLandscape()
 		// testCave()
-		testFOV()
+		// testFOV()
 		console.Flush_console()
 		key = console.ReadKey()
 	}
@@ -175,6 +178,47 @@ func fovAlgsPerfomanceCheck(px, py, w, h, fovRadius int, opacityMap *[][]bool) {
 	console.Flush_console()
 	console.SetBgColor(console.BLACK)
 	console.ReadKey()
+}
+
+func testRBR() {
+	w, h := console.GetConsoleSize()
+	gen := RBR_generator.RBR{}
+	vpath := "procedural_generation/RBR_generator/vaults.txt"
+	rvpath := "procedural_generation/RBR_generator/roomvaults.txt"
+	gen.Init(w, h, 3, vpath, rvpath)
+	gen.Generate()
+	console.SetFgColor(console.BLUE)
+	str := '?'
+	for i := 0; i < w; i++ {
+		for j := 0; j < h; j++ {
+			tile := gen.GetTileAt(i, j)
+			switch tile.TileType {
+			case RBR_generator.TWALL:
+				str = '#'
+				console.SetFgColor(console.DARK_RED)
+			case RBR_generator.TDOOR:
+				str = '+'
+				console.SetFgColor(console.GREEN)
+			case RBR_generator.TFLOOR:
+				str = '.'
+				console.SetFgColor(console.BEIGE)
+			case RBR_generator.TPREVLEVELSTAIR:
+				str = '<'
+				console.SetFgColor(console.BEIGE)
+			case RBR_generator.TNEXTLEVELSTAIR:
+				str = '>'
+				console.SetFgColor(console.BEIGE)
+			}
+			switch tile.SecArea {
+			case 0:
+			case 1:
+				console.SetFgColor(console.DARK_CYAN)
+			case 2:
+				console.SetFgColor(console.DARK_MAGENTA)
+			}
+			console.PutChar(str, i, j)
+		}
+	}
 }
 
 func testCave() {
