@@ -70,6 +70,29 @@ func (rnd *FibRandom) Rand(modulo int) int {
 	return new
 }
 
+func (rnd *FibRandom) OneChanceFrom(numChances int) bool {
+	return rnd.Rand(numChances) == 0 
+}
+
+func (rnd *FibRandom) BiasedRandInRange(from, to, bias, influencePercent int) int {
+	// rnd = random() x (max - min) + min
+	// mix = random() x influence
+	// value = rnd x (1 - mix) + bias x mix
+	const factor = 1
+	influencePercent *= factor 
+	totalrange := to - from
+	rand := rnd.RandInRange(0, totalrange)
+	mix := rnd.RandInRange(0, influencePercent)
+	result := (rand * (100*factor - mix) + (bias-from) * mix)
+	// proper rounding:  
+	if result % (100*factor) >= (50*factor) {
+		result += 100*factor 
+	}
+	result /= 100*factor
+
+	return result + from 
+}
+
 func (rnd *FibRandom) RollDice(dnum, dval, dmod int) int {
 	var result int
 	for i := 0; i < dnum; i++ {

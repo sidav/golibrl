@@ -9,7 +9,8 @@ func (r *RBR) placeRoomByPicking(roomId int, secArea int16, deadendOnly, placeVa
 finding_place:
 	for tries < maxtries {
 		tries++
-		roomW, roomH := rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE), rnd.RandInRange(r.MIN_RSIZE, r.MAX_RSIZE)
+		roomW, roomH := rnd.BiasedRandInRange(r.MIN_RSIZE, r.MAX_RSIZE, r.ROOM_SIZE_BIAS, 100), 
+			rnd.BiasedRandInRange(r.MIN_RSIZE, r.MAX_RSIZE, r.ROOM_SIZE_BIAS, 100)
 		coordsList := r.pickListOfCoordinatesForRoomToBeFit(roomW, roomH)
 		if coordsList == nil {
 			continue finding_place

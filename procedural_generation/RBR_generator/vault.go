@@ -10,8 +10,8 @@ type vault struct {
 
 func (v *vault) getStrings() *[]string { // randomly rotates and/or mirrors the vault
 	rotations := rnd.RandInRange(0, 3)
-	vMirror := rnd.Rand(2) == 0
-	hMirror := rnd.Rand(2) == 0
+	vMirror := rnd.OneChanceFrom(2)
+	hMirror := rnd.OneChanceFrom(2)
 	result := string_operations.GetMirroredStringArray(&v.strings, vMirror, hMirror)
 	for i := 1; i <= rotations; i++ {
 		result = string_operations.GetRotatedStringArray(result)
@@ -36,14 +36,14 @@ func (v *vault) getStringsIfFitInSize(w, h int) *[]string {
 		return v.getStrings()
 	}
 	if vw == w && vh == h { // only mirror 
-		vMirror := rnd.Rand(2) == 0
-		hMirror := rnd.Rand(2) == 0
+		vMirror := rnd.OneChanceFrom(2)
+		hMirror := rnd.OneChanceFrom(2)
 		result := string_operations.GetMirroredStringArray(&v.strings, vMirror, hMirror)
 		return result
 	}
 	if vw == h && vh == w { // will be fit if rotated 
-		vMirror := rnd.Rand(2) == 0
-		hMirror := rnd.Rand(2) == 0
+		vMirror := rnd.OneChanceFrom(2)
+		hMirror := rnd.OneChanceFrom(2)
 		result := string_operations.GetMirroredStringArray(&v.strings, vMirror, hMirror)
 		result = string_operations.GetRotatedStringArray(result)
 		return result

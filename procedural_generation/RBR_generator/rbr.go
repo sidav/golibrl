@@ -3,16 +3,16 @@ package RBR_generator
 import "github.com/sidav/golibrl/random/additive_random"
 
 type RBR struct {
-	tiles                    [][]tile
-	mapw, maph               int
-	MIN_CLENGTH, MAX_CLENGTH int
-	MIN_RSIZE, MAX_RSIZE     int
-	MINROOMS, MINCORRS       int
-	PLACEMENT_TRIES_LIMIT    int
-	VAULTS_NUM               int
-	numPlacedVaults          int
-	vaults, roomvaults       []*vault
-	NUM_SEC_AREAS            int 
+	tiles                                               [][]tile
+	mapw, maph                                          int
+	MIN_CLENGTH, MAX_CLENGTH                            int
+	MIN_RSIZE, MAX_RSIZE, ROOM_SIZE_BIAS                int
+	MINROOMS, MINCORRS                                  int
+	PLACEMENT_TRIES_LIMIT                               int
+	VAULTS_NUM                                          int
+	numPlacedRooms, numPlacedVaults, numPlacedCorridors int
+	vaults, roomvaults                                  []*vault
+	NUM_SEC_AREAS                                       int
 }
 
 var rnd additive_random.FibRandom
@@ -36,53 +36,55 @@ func (r *RBR) Init(w, h, secareas int, vaultsFilePath, roomvaultsFilePath string
 	r.maph = h
 	r.NUM_SEC_AREAS = secareas
 
-	// TODO: make these configurable. 
+	// TODO: make these configurable.
 	r.MIN_CLENGTH = 2
 	r.MAX_CLENGTH = r.mapw - 2
 	r.MIN_RSIZE = 3
-	r.MAX_RSIZE = r.mapw / 10
-	r.VAULTS_NUM = len(r.vaults) / 2
+	r.MAX_RSIZE = (r.mapw - 2) / 7
+	r.ROOM_SIZE_BIAS = r.MAX_RSIZE / 2
+	r.VAULTS_NUM = len(r.vaults)
 
 	// r.MINROOMS = 30
 	// r.MINCORRS = 50
 
 	mapArea := r.mapw * r.maph
-	maxRoomArea := r.MAX_RSIZE * r.MAX_RSIZE
-	minRoomArea := r.MIN_RSIZE * r.MIN_RSIZE
-	meanRoomArea := (3*maxRoomArea + minRoomArea) / 4
+	// maxRoomArea := r.MAX_RSIZE * r.MAX_RSIZE
+	// minRoomArea := r.MIN_RSIZE * r.MIN_RSIZE
+	meanRoomArea := (r.ROOM_SIZE_BIAS * r.ROOM_SIZE_BIAS)
 	r.MINROOMS = mapArea / (3 * meanRoomArea / 2)
 	mapArea -= r.MINROOMS * meanRoomArea
 	r.MINCORRS = mapArea / (r.MIN_CLENGTH * 20)
 	// r.MINCORRS = 0
 
-	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 100
+	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 10
 }
 
 func (r *RBR) Generate() {
 
-	roomsPlaced, corrsPlaced := r.placeInitialLayout()
+	r.numPlacedRooms, r.numPlacedCorridors = r.placeInitialLayout()
 
 	currLoop := 0
 	digged := false
 	increaseSecAreaEach := r.MINROOMS / r.NUM_SEC_AREAS
 	increaseSecAreaEach = rnd.RandInRange(increaseSecAreaEach-increaseSecAreaEach/2, increaseSecAreaEach+increaseSecAreaEach/2)
-	var currSecArea int16 = 0 
+	var currSecArea int16 = 0
 
-	for (roomsPlaced < r.MINROOMS || corrsPlaced < r.MINCORRS) && currLoop < r.PLACEMENT_TRIES_LIMIT {
-		if roomsPlaced%increaseSecAreaEach == 0 && int(currSecArea) < r.NUM_SEC_AREAS-1 {
+	for (r.numPlacedRooms < r.MINROOMS || r.numPlacedCorridors < r.MINCORRS) && currLoop < r.PLACEMENT_TRIES_LIMIT {
+		if r.numPlacedRooms%increaseSecAreaEach == 0 && int(currSecArea) < r.NUM_SEC_AREAS-1 {
 			currSecArea++
 		}
 		placementFromX, placementfromY := 0, 0
 		placementToX, placementToY := r.mapw, r.maph
 
-		roomsRemaining := r.MINROOMS - roomsPlaced
-		corrsRemaining := r.MINCORRS - corrsPlaced
+		roomsRemaining := r.MINROOMS - r.numPlacedRooms
+		corrsRemaining := r.MINCORRS - r.numPlacedCorridors
 		placeRoom := rnd.RandInRange(1, roomsRemaining+corrsRemaining) > corrsRemaining
 		if !placeRoom {
-			placementFromX += r.MAX_RSIZE / 2
-			placementfromY += r.MAX_RSIZE / 2
-			placementToX -= r.MAX_RSIZE / 2
-			placementToY -= r.MAX_RSIZE / 2
+			// change placement bounds ('cause it's corridor and we wanna reduce deadends) 
+			placementFromX += r.ROOM_SIZE_BIAS
+			placementfromY += r.ROOM_SIZE_BIAS
+			placementToX -= r.ROOM_SIZE_BIAS
+			placementToY -= r.ROOM_SIZE_BIAS
 		}
 
 		placeOnDeadendOnly := rnd.RandInRange(0, 2) != 0
@@ -94,20 +96,20 @@ func (r *RBR) Generate() {
 
 		if placeRoom {
 			digged = false
-			if rnd.Rand(2) == 1 || r.numPlacedVaults >= r.VAULTS_NUM {
-				vaultNeeded := rnd.Rand(3) == 0
-				digged = r.placeRoomByPicking(roomsPlaced+1, currSecArea, false, vaultNeeded)
+			if rnd.OneChanceFrom(2) || r.numPlacedVaults >= r.VAULTS_NUM {
+				vaultNeeded := rnd.OneChanceFrom(3)
+				digged = r.placeRoomByPicking(r.numPlacedRooms+1, currSecArea, false, vaultNeeded)
 			} else {
-				digged = r.placeRoomvaultByPicking(roomsPlaced+1, currSecArea, false)
+				digged = r.placeRoomvaultByPicking(r.numPlacedRooms+1, currSecArea, false)
 			}
 			if digged {
-				roomsPlaced++
+				r.numPlacedRooms++
 			}
 		} else {
-			forceNotDeadendCorridor := corrsPlaced > r.MINCORRS/4 || roomsPlaced > r.MINROOMS/2
+			forceNotDeadendCorridor := r.numPlacedCorridors > r.MINCORRS/4 || r.numPlacedRooms > r.MINROOMS/2
 			digged = r.placeCorridorFrom(x, y, forceNotDeadendCorridor)
 			if digged {
-				corrsPlaced++
+				r.numPlacedCorridors++
 			}
 		}
 		currLoop++
