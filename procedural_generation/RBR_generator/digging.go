@@ -11,7 +11,7 @@ func (r *RBR) digSpace(x, y, w, h, roomId int, secArea int16) {
 	}
 	for cx := x; cx < x+w; cx++ {
 		for cy := y; cy < y+h; cy++ {
-			if cx*cy != 0 && cx < r.mapw-1 && cy < r.maph-1 { // restrict digging close to map end 
+			if cx*cy != 0 && cx < r.mapw-1 && cy < r.maph-1 { // restrict digging close to map end
 				r.tiles[cx][cy].setProperties(TFLOOR, roomId, secArea)
 			}
 		}
@@ -29,7 +29,7 @@ func (r *RBR) setRoomIdForTilesRectangle(x, y, w, h, roomId int) {
 	}
 	for cx := x; cx < x+w; cx++ {
 		for cy := y; cy < y+h; cy++ {
-			if cx*cy != 0 && cx < r.mapw-1 && cy < r.maph-1 { // restrict digging close to map end 
+			if cx*cy != 0 && cx < r.mapw-1 && cy < r.maph-1 { // restrict digging close to map end
 				r.tiles[cx][cy].roomId = roomId
 			}
 		}
@@ -51,7 +51,7 @@ func (r *RBR) countTiletypesAround(ttype byte, x, y int, diagonals bool) int {
 			if cx < 0 || cy < 0 || cx >= r.mapw || cy >= r.maph {
 				continue
 			}
-			if r.tiles[cx][cy].tiletype == ttype {
+			if r.tiles[cx][cy].TileType == ttype {
 				ttypes++
 			}
 		}
@@ -76,7 +76,7 @@ func (r *RBR) isSpaceOfGivenType(x, y, w, h, outlineThickness int, ttype byte) b
 	}
 	for cx := x; cx < x+w; cx++ {
 		for cy := y; cy < y+h; cy++ {
-			if r.tiles[cx][cy].tiletype != ttype {
+			if r.tiles[cx][cy].TileType != ttype {
 				return false
 			}
 		}

@@ -22,7 +22,7 @@ finding_place:
 			jx, jy := r.pickJunctionTileForPotentialRoom(x, y, roomW, roomH, deadendOnly)
 			if jx != -1 && jy != -1 {
 				r.digSpace(x, y, roomW, roomH, roomId, secArea)
-				r.tiles[jx][jy].tiletype = TDOOR
+				r.tiles[jx][jy].TileType = TDOOR
 				placeFound = true 
 				r.tryPlaceVaultOfGivenSizeAtCoords(x+1, y+1, roomW-2, roomH-2)
 				break finding_place

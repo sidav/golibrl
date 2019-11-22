@@ -29,7 +29,7 @@ func (r *RBR) tryPlaceVaultOfGivenSizeAtCoords(x, y, w, h int) {
 	if len(vaultsOfSize) == 0 {
 		return
 	}
-	r.tiles[0][0].tiletype = TDOOR
+	r.tiles[0][0].TileType = TDOOR
 	vlt := vaultsOfSize[rnd.Rand(len(vaultsOfSize))]
 	vltStrings := vlt.getStringsIfFitInSize(w, h)
 	placeX, placeY := x, y
@@ -41,7 +41,7 @@ func (r *RBR) tryPlaceVaultOfGivenSizeAtCoords(x, y, w, h int) {
 			placeX, placeY = x, y+1
 		}
 	}
-	secArea := r.tiles[placeX][placeY].secArea
+	secArea := r.tiles[placeX][placeY].SecArea
 	roomId := r.tiles[placeX][placeY].roomId
 	r.tryPlaceVaultAtCoords(vltStrings, placeX, placeY, roomId, secArea)
 }
@@ -72,7 +72,7 @@ func (r *RBR) placeRandomVault() {
 			continue
 		}
 		coords := (*coordsList)[rnd.Rand(len(*coordsList))]
-		secArea := r.tiles[coords[0]][coords[1]].secArea
+		secArea := r.tiles[coords[0]][coords[1]].SecArea
 		roomId := r.tiles[coords[0]][coords[1]].roomId
 		r.tryPlaceVaultAtCoords(vaultStrs, coords[0], coords[1], roomId, secArea)
 		break

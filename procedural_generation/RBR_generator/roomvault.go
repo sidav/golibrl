@@ -8,7 +8,7 @@ global:
 		for y := 2; y+h < r.maph-1; y++ {
 			for vx := 0; vx < w; vx++ {
 				for vy := 0; vy < h; vy++ {
-					if !(r.tiles[x+vx][y+vy].tiletype == TWALL || rune((*vaultstrs)[vy][vx]) == ' ') {
+					if !(r.tiles[x+vx][y+vy].TileType == TWALL || rune((*vaultstrs)[vy][vx]) == ' ') {
 						continue global
 					}
 				}
@@ -70,7 +70,7 @@ finding_place:
 			x, y := (*coordsList)[currCoordIndex][0], (*coordsList)[currCoordIndex][1]
 			jx, jy := r.pickJunctionTileForVault(x, y, vaultstrs, deadendOnly)
 			if jx != -1 && jy != -1 {
-				r.tiles[jx][jy].tiletype = TDOOR
+				r.tiles[jx][jy].TileType = TDOOR
 				placeFound = true
 				r.tryPlaceVaultAtCoords(vaultstrs, x, y, roomId, secArea)
 				// r.setRoomIdForTilesRectangle(x, y, roomW, roomH, roomId)

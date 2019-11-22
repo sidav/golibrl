@@ -1,4 +1,5 @@
 package RBR_generator
+
 import "strconv"
 
 const (
@@ -9,29 +10,29 @@ const (
 	TPREVLEVELSTAIR
 	TUNKNOWN
 
-	T_NOCHANGE 
+	T_NOCHANGE
 )
 
 type tile struct {
-	tiletype byte
+	TileType byte
 	roomId   int
-	secArea int16 
+	SecArea  int16
 }
 
 func (t *tile) setProperties(ttype uint8, roomId int, secId int16) {
 	if ttype != T_NOCHANGE {
-		t.tiletype = ttype 
+		t.TileType = ttype
 	}
 	if roomId != -1 {
 		t.roomId = roomId
 	}
 	if secId != -1 {
-		t.secArea = secId 
+		t.SecArea = secId
 	}
 }
 
 func (t *tile) toRune() rune {
-	switch t.tiletype {
+	switch t.TileType {
 	case TFLOOR:
 		return '.'
 	case TWALL:
@@ -41,10 +42,10 @@ func (t *tile) toRune() rune {
 	case TPREVLEVELSTAIR:
 		return '<'
 	case TDOOR:
-		if t.secArea == 0 {
-		return '+'
+		if t.SecArea == 0 {
+			return '+'
 		} else {
-			return rune(strconv.Itoa(int(t.secArea))[0]) //'\\'
+			return rune(strconv.Itoa(int(t.SecArea))[0]) //'\\'
 		}
 	}
 	return '?'

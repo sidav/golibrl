@@ -7,8 +7,8 @@ func (r *RBR) pickListOfDiggableDirectionsFrom(x, y int, allowContinuation bool)
 			if x+vx < 0 || y+vy < 0 || x+vx >= r.mapw || y+vy >= r.maph {
 				continue
 			}
-			if vx != vy && vx*vy == 0 && r.tiles[x+vx][y+vy].tiletype == TWALL {
-				if allowContinuation || r.tiles[x-vx][y-vy].tiletype != TFLOOR {
+			if vx != vy && vx*vy == 0 && r.tiles[x+vx][y+vy].TileType == TWALL {
+				if allowContinuation || r.tiles[x-vx][y-vy].TileType != TFLOOR {
 					dirs = append(dirs, []int{vx, vy})
 				}
 			}
@@ -18,7 +18,7 @@ func (r *RBR) pickListOfDiggableDirectionsFrom(x, y int, allowContinuation bool)
 }
 
 func (r *RBR) isTileSuitableForJunction(x, y int, deadendOnly bool) bool {
-	if r.tiles[x][y].tiletype == TWALL {
+	if r.tiles[x][y].TileType == TWALL {
 		if deadendOnly {
 			walls := r.countTiletypesAround(TWALL, x, y, true)
 			floors := r.countTiletypesAround(TFLOOR, x, y, false)

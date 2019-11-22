@@ -21,9 +21,9 @@ func (r *RBR) placeStairAtRandom(ttype byte, minSecArea, maxSecArea int16) bool 
 	suitableEntrCoords := make([][]int, 0)
 	for x := 1; x < r.mapw; x++ {
 		for y := 1; y < r.maph; y++ {
-			if r.tiles[x][y].tiletype == TFLOOR && 
-			r.tiles[x][y].secArea >= minSecArea &&
-			r.tiles[x][y].secArea <= maxSecArea &&
+			if r.tiles[x][y].TileType == TFLOOR && 
+			r.tiles[x][y].SecArea >= minSecArea &&
+			r.tiles[x][y].SecArea <= maxSecArea &&
 			 r.countTiletypesAround(TFLOOR, x, y, true) > 2 {
 				suitableEntrCoords = append(suitableEntrCoords, []int{x, y})
 			}
