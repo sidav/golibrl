@@ -198,7 +198,7 @@ func testRBR() {
 				console.SetFgColor(console.DARK_RED)
 			case RBR_generator.TDOOR:
 				str = '+'
-				console.SetFgColor(console.BLUE)
+				console.SetFgColor(console.GREEN)
 			case RBR_generator.TFLOOR:
 				str = '.'
 				console.SetFgColor(console.BEIGE)
@@ -212,7 +212,7 @@ func testRBR() {
 			switch tile.SecArea {
 			case 0:
 			case 1:
-				console.SetFgColor(console.DARK_GREEN)
+				console.SetFgColor(console.DARK_CYAN)
 			case 2:
 				console.SetFgColor(console.DARK_MAGENTA)
 			}

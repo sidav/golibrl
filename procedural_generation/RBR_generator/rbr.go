@@ -41,7 +41,7 @@ func (r *RBR) Init(w, h, secareas int, vaultsFilePath, roomvaultsFilePath string
 	r.MAX_CLENGTH = r.mapw - 2
 	r.MIN_RSIZE = 3
 	r.MAX_RSIZE = (r.mapw - 2) / 7
-	r.ROOM_SIZE_BIAS = r.MAX_RSIZE / 2
+	r.ROOM_SIZE_BIAS = 2 * r.MIN_RSIZE
 	r.VAULTS_NUM = len(r.vaults)
 
 	// r.MINROOMS = 30
@@ -65,13 +65,20 @@ func (r *RBR) Generate() {
 
 	currLoop := 0
 	digged := false
-	increaseSecAreaEach := r.MINROOMS / r.NUM_SEC_AREAS
-	increaseSecAreaEach = rnd.RandInRange(increaseSecAreaEach-increaseSecAreaEach/2, increaseSecAreaEach+increaseSecAreaEach/2)
+
+	increaseSecAreaEach := r.MINROOMS / (5 * r.NUM_SEC_AREAS)
+	increaseSecAreaEach *= rnd.RandInRange(1, 4)
+	if increaseSecAreaEach == 0 && r.NUM_SEC_AREAS != 0 {
+		increaseSecAreaEach = 1 
+	}
+	nextRoomsForIncSecArea := increaseSecAreaEach
+
 	var currSecArea int16 = 0
 
 	for (r.numPlacedRooms < r.MINROOMS || r.numPlacedCorridors < r.MINCORRS) && currLoop < r.PLACEMENT_TRIES_LIMIT {
-		if r.numPlacedRooms%increaseSecAreaEach == 0 && int(currSecArea) < r.NUM_SEC_AREAS-1 {
+		if r.numPlacedRooms >= nextRoomsForIncSecArea && int(currSecArea) < r.NUM_SEC_AREAS-1 {
 			currSecArea++
+			nextRoomsForIncSecArea += increaseSecAreaEach
 		}
 		placementFromX, placementfromY := 0, 0
 		placementToX, placementToY := r.mapw, r.maph

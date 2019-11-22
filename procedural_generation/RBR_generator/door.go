@@ -66,8 +66,9 @@ func (r *RBR) getHighestSecAreaNearTile(x, y int) int16 {
 			if x+vx < 0 || y+vy < 0 || x+vx >= r.mapw || y+vy >= r.maph {
 				continue
 			}
-			if vx != vy && vx*vy == 0 && r.tiles[x+vx][y+vy].SecArea > currSecArea {
-				currSecArea = r.tiles[x+vx][y+vy].SecArea
+			secArea := r.tiles[x+vx][y+vy].SecArea
+			if vx != vy && vx*vy == 0 && secArea > currSecArea {
+				currSecArea = secArea
 			}
 		}
 	}
