@@ -182,7 +182,9 @@ func fovAlgsPerfomanceCheck(px, py, w, h, fovRadius int, opacityMap *[][]bool) {
 func testRBR() {
 	w, h := console.GetConsoleSize()
 	gen := RBR_generator.RBR{}
-	gen.Init(w, h)
+	vpath := "procedural_generation/RBR_generator/vaults.txt"
+	rvpath := "procedural_generation/RBR_generator/roomvaults.txt"
+	gen.Init(w, h, 3, vpath, rvpath)
 	gen.Generate()
 	cave := gen.GetMapChars()
 	console.SetFgColor(console.BLUE)

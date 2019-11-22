@@ -17,11 +17,15 @@ type RBR struct {
 
 var rnd additive_random.FibRandom
 
-func (r *RBR) Init(w, h int) {
+func (r *RBR) Init(w, h, secareas int, vaultsFilePath, roomvaultsFilePath string) {
 	rnd = additive_random.FibRandom{}
 
-	r.readVaultsFromFile("procedural_generation/RBR_generator/vaults.txt") // TODO: custom vaults file.
-	r.readRoomVaultsFromFile("procedural_generation/RBR_generator/roomvaults.txt")
+	if vaultsFilePath != "" {
+		r.readVaultsFromFile("procedural_generation/RBR_generator/vaults.txt") // TODO: custom vaults file.
+	}
+	if roomvaultsFilePath != "" {
+		r.readRoomVaultsFromFile("procedural_generation/RBR_generator/roomvaults.txt")
+	}
 
 	rnd.InitBySeed(-1)
 	r.tiles = make([][]tile, w)
@@ -30,11 +34,13 @@ func (r *RBR) Init(w, h int) {
 	}
 	r.mapw = w
 	r.maph = h
+	r.NUM_SEC_AREAS = secareas
 
+	// TODO: make these configurable. 
 	r.MIN_CLENGTH = 2
 	r.MAX_CLENGTH = r.mapw - 2
 	r.MIN_RSIZE = 3
-	r.MAX_RSIZE = 10 // r.mapw / 10
+	r.MAX_RSIZE = r.mapw / 10
 	r.VAULTS_NUM = len(r.vaults) / 2
 
 	// r.MINROOMS = 30
@@ -50,7 +56,6 @@ func (r *RBR) Init(w, h int) {
 	// r.MINCORRS = 0
 
 	r.PLACEMENT_TRIES_LIMIT = (r.MINROOMS + r.MINCORRS) * 100
-	r.NUM_SEC_AREAS = 2
 }
 
 func (r *RBR) Generate() {
