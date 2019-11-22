@@ -122,6 +122,13 @@ func (r *RBR) Generate() {
 	// }
 }
 
+func (r *RBR) GetTileAt(x, y int) *tile {
+	if x >= 0 && y >= 0 && x < r.mapw && y < r.maph {
+		return &r.tiles[x][y]
+	}
+	return nil 
+} 
+
 ///////////////////////////////////////////////////////////////////
 func (rbr *RBR) GetMapChars() *[][]rune {
 	runearr := make([][]rune, rbr.mapw)

@@ -20,6 +20,7 @@ func main() {
 	console.Init_console("test", console.TCellRenderer)
 	defer console.Close_console()
 	key := ""
+	console.Clear_console()
 	for key != "ESCAPE" {
 		testRBR()
 		// angletest()
@@ -186,19 +187,34 @@ func testRBR() {
 	rvpath := "procedural_generation/RBR_generator/roomvaults.txt"
 	gen.Init(w, h, 3, vpath, rvpath)
 	gen.Generate()
-	cave := gen.GetMapChars()
 	console.SetFgColor(console.BLUE)
-	str := '#'
-	for i := 0; i < len(*cave); i++ {
-		for j := 0; j < len((*cave)[0]); j++ {
-			str = (*cave)[i][j]
-			switch str {
-			case '#':
+	str := '?'
+	for i := 0; i < w; i++ {
+		for j := 0; j < h; j++ {
+			tile := gen.GetTileAt(i, j)
+			switch tile.TileType {
+			case RBR_generator.TWALL:
+				str = '#'
 				console.SetFgColor(console.DARK_RED)
-			case '+':
-				console.SetFgColor(console.GREEN)
-			case '.':
-				console.SetFgColor(console.WHITE)
+			case RBR_generator.TDOOR:
+				str = '+'
+				console.SetFgColor(console.BLUE)
+			case RBR_generator.TFLOOR:
+				str = '.'
+				console.SetFgColor(console.BEIGE)
+			case RBR_generator.TPREVLEVELSTAIR:
+				str = '<'
+				console.SetFgColor(console.BEIGE)
+			case RBR_generator.TNEXTLEVELSTAIR:
+				str = '>'
+				console.SetFgColor(console.BEIGE)
+			}
+			switch tile.SecArea {
+			case 0:
+			case 1:
+				console.SetFgColor(console.DARK_GREEN)
+			case 2:
+				console.SetFgColor(console.DARK_MAGENTA)
 			}
 			console.PutChar(str, i, j)
 		}

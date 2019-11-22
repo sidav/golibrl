@@ -29,7 +29,7 @@ func (r *RBR) tryPlaceVaultOfGivenSizeAtCoords(x, y, w, h int) {
 	if len(vaultsOfSize) == 0 {
 		return
 	}
-	r.tiles[0][0].TileType = TDOOR
+
 	vlt := vaultsOfSize[rnd.Rand(len(vaultsOfSize))]
 	vltStrings := vlt.getStringsIfFitInSize(w, h)
 	placeX, placeY := x, y
