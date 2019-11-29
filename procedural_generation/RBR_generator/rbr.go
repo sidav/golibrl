@@ -21,10 +21,10 @@ func (r *RBR) Init(w, h, secareas int, vaultsFilePath, roomvaultsFilePath string
 	rnd = additive_random.FibRandom{}
 
 	if vaultsFilePath != "" {
-		r.readVaultsFromFile("procedural_generation/RBR_generator/vaults.txt") // TODO: custom vaults file.
+		r.readVaultsFromFile(vaultsFilePath) // TODO: custom vaults file.
 	}
 	if roomvaultsFilePath != "" {
-		r.readRoomVaultsFromFile("procedural_generation/RBR_generator/roomvaults.txt")
+		r.readRoomVaultsFromFile(roomvaultsFilePath)
 	}
 
 	rnd.InitBySeed(-1)
