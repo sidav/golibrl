@@ -8,8 +8,8 @@ type Dice struct {
 	dnum, dval, dmod int
 }
 
-func NewDice(dnum, dval, dmod int) Dice {
-	return Dice{dnum: dnum, dval: dval, dmod: dmod}
+func NewDice(dnum, dval, dmod int) *Dice {
+	return &Dice{dnum: dnum, dval: dval, dmod: dmod}
 }
 
 func (d *Dice) Roll(prng DicePrng) int {
