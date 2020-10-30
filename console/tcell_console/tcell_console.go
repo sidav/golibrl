@@ -111,18 +111,18 @@ func WasResized() bool {
 //
 
 func SetColor(fg int, bg int) {
-	fg_color = tcell.Color(fg)
-	bg_color = tcell.Color(bg)
+	fg_color = tcell.Color(fg) + tcell.ColorValid
+	bg_color = tcell.Color(bg) + tcell.ColorValid
 	style = style.Foreground(fg_color).Background(bg_color)
 }
 
 func SetFgColor(fg int) {
-	fg_color = tcell.Color(fg)
+	fg_color = tcell.Color(fg) + tcell.ColorValid
 	style = style.Foreground(fg_color).Background(bg_color)
 }
 
 func SetBgColor(bg int) {
-	bg_color = tcell.Color(bg)
+	bg_color = tcell.Color(bg) + tcell.ColorValid
 	style = style.Foreground(fg_color).Background(bg_color)
 }
 
