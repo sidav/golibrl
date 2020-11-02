@@ -8,6 +8,7 @@ import (
 	"github.com/sidav/golibrl/fov/mill_fov"
 	"github.com/sidav/golibrl/fov/permissive_fov"
 	"github.com/sidav/golibrl/fov/strict_definition_fov"
+	"github.com/sidav/golibrl/procedural_generation/BSP_generator"
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
 	"github.com/sidav/golibrl/procedural_generation/RBR_generator"
@@ -22,7 +23,8 @@ func main() {
 	key := ""
 	console.Clear_console()
 	for key != "ESCAPE" {
-		testRBR()
+		testBSP()
+		// testRBR()
 		// angletest()
 		// testFractalLandscape()
 		// testCave()
@@ -52,6 +54,36 @@ var cave *[]string
 
 func opacityFunc(x, y int) bool {
 	return rune((*cave)[x][y]) == '#'
+}
+
+func testBSP() {
+	w, h := console.GetConsoleSize()
+	cave := BSP_generator.GenerateDungeon(w, h, 7, 85, 2, 50, 5)
+	// gen.Init(w, h, 3, vpath, rvpath)
+	// gen.Generate()
+	for i := 0; i < w; i++ {
+		str := ' '
+		console.SetFgColor(console.BLACK)
+		console.SetBgColor(console.DARK_RED)
+		console.PutChar(str, i, 0)
+		for j := 0; j < h; j++ {
+			str = cave.GetCell(i, j)
+			switch str {
+			case '#':
+				str = ' '
+				console.SetFgColor(console.BLACK)
+				console.SetBgColor(console.DARK_RED)
+				break
+			case '~':
+				console.SetFgColor(console.DARK_BLUE)
+				console.SetBgColor(console.BLACK)
+			default:
+				console.SetFgColor(console.WHITE)
+				console.SetBgColor(console.BLACK)
+			}
+			console.PutChar(str, i, j)
+		}
+	}
 }
 
 func testFOV() {
