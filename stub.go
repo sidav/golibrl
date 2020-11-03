@@ -12,6 +12,7 @@ import (
 	"github.com/sidav/golibrl/procedural_generation/CA_cave"
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
 	"github.com/sidav/golibrl/procedural_generation/RBR_generator"
+	"github.com/sidav/golibrl/procedural_generation/dungeon_generator"
 	"strconv"
 	"strings"
 	"time"
@@ -23,7 +24,8 @@ func main() {
 	key := ""
 	console.Clear_console()
 	for key != "ESCAPE" {
-		testBSP()
+		testgen()
+		// testBSP()
 		// testRBR()
 		// angletest()
 		// testFractalLandscape()
@@ -54,6 +56,37 @@ var cave *[]string
 
 func opacityFunc(x, y int) bool {
 	return rune((*cave)[x][y]) == '#'
+}
+
+func testgen() {
+	w, h := console.GetConsoleSize()
+	gen := dungeon_generator.Generator{
+		Width:             w,
+		Height:            h,
+		MaxRooms:          10,
+		MinRoomXY:         5,
+		MaxRoomXY:         20,
+		RandomConnections: 0,
+		RandomSpurs:       0,
+		RoomsOverlap:      false,
+	}
+	gen.Init()
+	cave := gen.GenLevel()
+	// gen.Init(w, h, 3, vpath, rvpath)
+	// gen.Generate()
+	for i := 0; i < h; i++ {
+		for j := 0; j < w; j++ {
+			chr := cave[i][j]
+			if chr == '.' {
+				console.SetFgColor(console.WHITE)
+				console.SetBgColor(console.BLACK)
+			} else {
+				console.SetFgColor(console.BLACK)
+				console.SetBgColor(console.DARK_RED)
+			}
+			console.PutChar(cave[i][j], j, i)
+		}
+	}
 }
 
 func testBSP() {
