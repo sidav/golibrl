@@ -191,6 +191,8 @@ func eventToKeyString(ev *tcell.EventKey) string {
 		return "ESCAPE"
 	case tcell.KeyEnter:
 		return "ENTER"
+	case tcell.KeyBackspace:
+		return "BACKSPACE"
 	case tcell.KeyTab:
 		return "TAB"
 	case tcell.KeyDelete:
