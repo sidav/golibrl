@@ -35,7 +35,7 @@ const ( // for the great compatibility with default console color codes
 var (
 	winTitle            = "Go-SDL2 Texture"
 	chrW, chrH          int32
-	termW, termH        int32 = 100, 40
+	termW, termH        int32 = 80, 25
 	winWidth, winHeight int32
 	FontPngFileName     string
 	window              *sdl.Window
