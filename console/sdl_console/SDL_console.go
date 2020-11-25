@@ -225,6 +225,8 @@ func ReadKey() string {
 		}
 		event := <-evCh
 		switch t := event.(type) {
+		case *sdl.WindowEvent:
+			windowEventWork(t)
 		case *sdl.KeyboardEvent:
 			if t.State == 1 {
 				keyString := sdl.GetScancodeName(t.Keysym.Scancode)
@@ -267,19 +269,22 @@ func ReadKeyAsync() string { // also reads mouse events... TODO: think of if sep
 	case *sdl.MouseButtonEvent:
 		mouseButtonWork(ev)
 	case *sdl.WindowEvent:
-		windowResizeWork(ev)
+		windowEventWork(ev)
 	}
 	return "NON-KEY"
 }
 
-func windowResizeWork(wEvent *sdl.WindowEvent) {
+func windowEventWork(wEvent *sdl.WindowEvent) {
 	evnt := wEvent.Event
-	if evnt == sdl.WINDOWEVENT_RESIZED {
-		winWidth, winHeight = wEvent.Data1, wEvent.Data2
+	if evnt == sdl.WINDOWEVENT_RESIZED || evnt == sdl.WINDOWEVENT_MOVED {
+		win, _ := sdl.GetWindowFromID(wEvent.WindowID)
+		winWidth, winHeight = win.GetSize()
+		// winWidth, winHeight = wEvent.Data1, wEvent.Data2
 		termW, termH = winWidth/chrW, winHeight/chrH
 		window.SetSize(winWidth, winHeight)
 		wasResized = true
 	}
+	Flush_console()
 }
 
 func mouseMoveWork(ev *sdl.MouseMotionEvent) {
