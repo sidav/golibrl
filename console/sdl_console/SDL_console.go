@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -32,11 +33,11 @@ const ( // for the great compatibility with default console color codes
 )
 
 var (
-	winTitle                  = "Go-SDL2 Texture"
-	chrW, chrH          int32 = 10, 16
+	winTitle            = "Go-SDL2 Texture"
+	chrW, chrH          int32
 	termW, termH        int32 = 100, 40
-	winWidth, winHeight       = termW*chrW, termH*chrH
-	FontPngFileName           = "assets/font_10x16.png"
+	winWidth, winHeight int32
+	FontPngFileName     string
 	window              *sdl.Window
 	renderer            *sdl.Renderer
 	texture             *sdl.Texture
@@ -81,19 +82,30 @@ var (
 )
 
 func prepareFont() {
-	// pix := fontImg.Pixels()
+	files, err := ioutil.ReadDir("assets/")
+	if err != nil {
+		panic(err)
+	}
+	for _, f := range files {
+		if strings.Contains(f.Name(), ".png") {
+			FontPngFileName = "assets/" + f.Name()
+		}
+	}
+
+	fontImg, err = img.Load(FontPngFileName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to load PNG: %s\n", err)
+		return
+	}
+	chrW = fontImg.W / 16
+	chrH = fontImg.H / 16
+	winWidth, winHeight = termW*chrW, termH*chrH
 	fontImg.SetColorKey(true, 0xff00ff)
-	//fmt.Printf("SIZE: %d with %d/%d; ", len(fontImg.Pixels()), fontImg.PixelNum(), fontImg.BytesPerPixel())
-	//fmt.Printf("pix: %d ", fontImg.Pixels()[0])
-	//fmt.Printf("%d ", fontImg.Pixels()[1])
-	//fmt.Printf("%d ", fontImg.Pixels()[2])
-	//fmt.Printf("%d ", fontImg.Pixels()[3])
-	//for i := 0; i < len(pix); i+= 4 {
-	//
-	//}
 }
 
 func Init_console(title string) {
+
+	prepareFont()
 
 	window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
 		winWidth, winHeight, sdl.WINDOW_SHOWN+sdl.WINDOW_RESIZABLE)
@@ -107,13 +119,6 @@ func Init_console(title string) {
 		fmt.Fprintf(os.Stderr, "Failed to create renderer: %s\n", err)
 		return
 	}
-
-	fontImg, err = img.Load(FontPngFileName)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to load PNG: %s\n", err)
-		return
-	}
-	prepareFont()
 
 	texture, err = renderer.CreateTextureFromSurface(fontImg)
 	if err != nil {
@@ -194,8 +199,9 @@ func SetBgColor(bg int) {
 func PutChar(c rune, x, y int) {
 	code := int32(c)
 	if code < 256 {
-		row := code / 16
-		col := code % 16
+		row := code / 16 // chrH
+		col := code % 16 // chrH
+		// fmt.Printf("rune %s, code %d int32code %d, row/col %d, %d \n", string(c), int(c), code, row, col)
 		src = sdl.Rect{chrW * col, chrH * row, chrW, chrH}
 		dst = sdl.Rect{chrW * int32(x), chrH * int32(y), chrW, chrH}
 		renderer.SetDrawColor(bgColor[0], bgColor[1], bgColor[2], 255)
