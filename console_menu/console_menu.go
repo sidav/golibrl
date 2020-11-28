@@ -176,14 +176,17 @@ func ShowSingleChoiceMenu(title, subheading string, lines []string) int { //retu
 			cw.SetBgColor(cw.BLACK)
 		}
 		cw.Flush_console()
-		key := cw.ReadKey()
+		key := "NOTHING"
+		for key == "NOTHING" {
+			key = cw.ReadKeyAsync()
+		}
 		switch key {
-		case "2":
+		case "2", "DOWN":
 			cursor++
 			if cursor == len(val) {
 				cursor = 0
 			}
-		case "8":
+		case "8", "UP":
 			cursor--
 			if cursor < 0 {
 				cursor = len(val) - 1

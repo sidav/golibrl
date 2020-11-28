@@ -30,6 +30,8 @@ const ( // for the great compatibility with default console color codes
 
 	timeForMouseToBeHeld    = 75 * time.Millisecond
 	timeForMouseToBeClicked = 25 * time.Millisecond
+
+	USE_ASYNC_EVENT_POLL = false // "true" works good on Linux only.
 )
 
 var (
@@ -127,14 +129,16 @@ func Init_console(title string) {
 	}
 
 	evCh = make(chan sdl.Event, 1)
-	go startAsyncEventListener()
+	if USE_ASYNC_EVENT_POLL {
+		go startAsyncEventListener()
+	}
 
 	renderer.Clear()
 	renderer.SetDrawColor(0, 0, 0, 255)
 	renderer.FillRect(&sdl.Rect{0, 0, int32(winWidth), int32(winHeight)})
 	renderer.Copy(texture, &src, &dst)
 	renderer.Present()
-	sdl.Delay(0)
+	sdl.Delay(1)
 }
 
 func Close_console() { //should be deferred!
@@ -219,14 +223,17 @@ func PutString(s string, x, y int) {
 }
 
 func ReadKey() string {
+	fmt.Print("Starting ReadKey() \n")
 	for {
-		for len(evCh) == 0 { // wait here until an event is in the event queue
-			time.Sleep(10 * time.Millisecond)
+		if !USE_ASYNC_EVENT_POLL {
+			listenEvents()
 		}
 		event := <-evCh
 		switch t := event.(type) {
 		case *sdl.WindowEvent:
 			windowEventWork(t)
+		case *sdl.QuitEvent:
+			panic("Omg quit!")
 		case *sdl.KeyboardEvent:
 			if t.State == 1 {
 				keyString := sdl.GetScancodeName(t.Keysym.Scancode)
@@ -244,6 +251,10 @@ func ReadKey() string {
 }
 
 func ReadKeyAsync() string { // also reads mouse events... TODO: think of if separate mouse events reader is needed.
+	fmt.Print("Starting ReadKeyAsync() \n")
+	if !USE_ASYNC_EVENT_POLL {
+		listenEvents()
+	}
 	if len(evCh) == 0 {
 		return "NOTHING"
 	}
@@ -353,7 +364,23 @@ func GetMouseMovementVector() (int, int) {
 	return mouseVectorX, mouseVectorY
 }
 
+// syncronous
+func listenEvents() {
+	//start := time.Now()
+	//for time.Since(start) < 20 * time.Millisecond {
+	// fmt.Print("Waiting event...")
+	ev := sdl.WaitEventTimeout(5)
+	// fmt.Print(" wait complete.\n")
+	select {
+	case evCh <- ev:
+	default:
+		sdl.Delay(0)
+	}
+	//}
+}
+
 func startAsyncEventListener() {
+	fmt.Print("Async Event Listening... \n")
 	for {
 		ev := sdl.WaitEvent()
 		select {
