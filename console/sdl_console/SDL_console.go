@@ -69,7 +69,7 @@ var (
 		WHITE:        {255, 255, 255},
 	}
 
-	wasResized     = false
+	wasResized     = true
 	evCh           chan sdl.Event
 	flushesCounter int
 
