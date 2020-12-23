@@ -223,7 +223,7 @@ func PutString(s string, x, y int) {
 }
 
 func ReadKey() string {
-	fmt.Print("Starting ReadKey() \n")
+	// fmt.Print("Starting ReadKey() \n")
 	for {
 		if !USE_ASYNC_EVENT_POLL {
 			listenEvents()
@@ -251,7 +251,7 @@ func ReadKey() string {
 }
 
 func ReadKeyAsync() string { // also reads mouse events... TODO: think of if separate mouse events reader is needed.
-	fmt.Print("Starting ReadKeyAsync() \n")
+	// fmt.Print("Starting ReadKeyAsync() \n")
 	if !USE_ASYNC_EVENT_POLL {
 		listenEvents()
 	}
@@ -380,7 +380,7 @@ func listenEvents() {
 }
 
 func startAsyncEventListener() {
-	fmt.Print("Async Event Listening... \n")
+	// fmt.Print("Async Event Listening... \n")
 	for {
 		ev := sdl.WaitEvent()
 		select {
