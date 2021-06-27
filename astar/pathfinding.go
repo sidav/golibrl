@@ -7,52 +7,21 @@ const (
 	DEFAULT_PATHFINDING_STEPS = 175 // Increase in case of stupid pathfinding. Decrease in case of lag.
 )
 
-type Cell struct {
-	X, Y            int
-	g, h            int
-	costToMoveThere int
-	parent          *Cell
-	Child           *Cell
-}
-
-func (c *Cell) getF() int {
-	return c.g + c.h
-}
-
-func (c *Cell) GetCoords() (int, int) {
-	return c.X, c.Y
-}
-
-func (c *Cell) setG(inc int) {
-	if c.parent != nil {
-		c.g = c.parent.g + inc
-	}
-}
-
-func (c *Cell) GetNextStepVector() (int, int) {
-	var x, y int
-	if c.Child != nil {
-		x = c.Child.X - c.X
-		y = c.Child.Y - c.Y
-	}
-	return x, y
-}
-
-func abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
-}
-
 func heuristicCost(fromx, fromy, tox, toy int, diagonalsAllowed bool) int {
 	if diagonalsAllowed {
-		return (fromx-tox)*(fromx-tox)+(fromy-toy)*(fromy-toy)
+		return (fromx-tox)*(fromx-tox) + (fromy-toy)*(fromy-toy)
 	}
 	return HEURISTIC_MULTIPLIER * (abs(tox-fromx) + abs(toy-fromy))
 }
 
-func getIndexOfCellWithLowestF(openList []*Cell) int {
+type AStarPathfinder struct {
+	DiagonalMoveAllowed, ForceGetPath, ForceIncludeFinish, AutoAdjustDefaultMaxSteps bool
+	// private
+	targetCell *Cell
+	toX, toY int
+}
+
+func (aspf *AStarPathfinder) getIndexOfCellWithLowestF(openList []*Cell) int {
 	cheapestCellIndex := 0
 	for i, c := range openList {
 		if c.getF() < openList[cheapestCellIndex].getF() {
@@ -62,60 +31,43 @@ func getIndexOfCellWithLowestF(openList []*Cell) int {
 	return cheapestCellIndex
 }
 
-//func (c *Cell) getPathToCell() *[]*Cell {
-//	path := make([]*Cell, 0)
-//	curcell := c
-//	for curcell != nil {
-//		path = append(path, curcell)
-//		curcell = curcell.parent
-//	}
-//	return &path
-//}
-
-func (c *Cell) setChildsForPath() {
-	// path := make([]*Cell, 0)
-	curcell := c
-	for curcell.parent != nil {
-		// path = append(path, curcell)
-		curcell.parent.Child = curcell
-		curcell = curcell.parent
-	}
-	return
-}
-
-func FindPath(costMap *[][]int, fromx, fromy, tox, toy int, diagonalMoveAllowed bool, maxSearchDepth int, forceGetPath, forceIncludeFinish bool) *Cell {
+func (aspf *AStarPathfinder) FindPath(costMap *[][]int, fromx, fromy, tox, toy int) *Cell {
+	aspf.toX = tox
+	aspf.toY = toy
+	aspf.targetCell = nil
 	openList := make([]*Cell, 0)
 	closedList := make([]*Cell, 0)
 	var currentCell *Cell
 	total_steps := 0
 	targetReached := false
-	if maxSearchDepth < 1 {
-		maxSearchDepth = DEFAULT_PATHFINDING_STEPS
+	totalCells := len(*costMap) * len((*costMap)[0])
+
+	maxSearchDepth := DEFAULT_PATHFINDING_STEPS
+	if totalCells > DEFAULT_PATHFINDING_STEPS && aspf.AutoAdjustDefaultMaxSteps {
+		maxSearchDepth = totalCells
 	}
 
 	// step 1
-	origin := &Cell{X: fromx, Y: fromy, costToMoveThere: 0, h: heuristicCost(fromx, fromy, tox, toy, diagonalMoveAllowed)}
+	origin := &Cell{X: fromx, Y: fromy, h: heuristicCost(fromx, fromy, tox, toy, aspf.DiagonalMoveAllowed)}
 	openList = append(openList, origin)
 	// step 2
 	for !targetReached {
 		// sub-step 2a:
-		currentCellIndex := getIndexOfCellWithLowestF(openList)
+		currentCellIndex := aspf.getIndexOfCellWithLowestF(openList)
 		currentCell = openList[currentCellIndex]
 		// sub-step 2b:
 		closedList = append(closedList, currentCell)
 		openList = append(openList[:currentCellIndex], openList[currentCellIndex+1:]...) // this friggin' magic removes currentCellIndex'th element from openList
 		//sub-step 2c:
-		analyzeNeighbors(currentCell, &openList, &closedList, costMap, tox, toy, diagonalMoveAllowed, forceIncludeFinish)
+		aspf.analyzeNeighbors(currentCell, &openList, &closedList, costMap, tox, toy)
 		//sub-step 2d:
 		total_steps += 1
-		targetInOpenList := getCellWithCoordsFromList(&openList, tox, toy)
-		if targetInOpenList != nil {
-			currentCell = targetInOpenList
-			currentCell.setChildsForPath()
+		if aspf.targetCell != nil {
+			aspf.targetCell.setChildsForPath()
 			return origin
 		}
 		if len(openList) == 0 || total_steps > maxSearchDepth {
-			if forceGetPath { // makes the routine always return path to the closest possible cell to (tox, toy) even if the precise path does not exist.
+			if aspf.ForceGetPath { // makes the routine always return path to the closest possible cell to (tox, toy) even if the precise path does not exist.
 				currentCell = getCellWithLowestHeuristicFromList(&closedList)
 				currentCell.setChildsForPath()
 				return origin
@@ -127,27 +79,27 @@ func FindPath(costMap *[][]int, fromx, fromy, tox, toy int, diagonalMoveAllowed 
 	return nil
 }
 
-func analyzeNeighbors(curCell *Cell, openlist *[]*Cell, closedlist *[]*Cell, costMap *[][]int, targetX, targetY int, diagAllowed, forceIncludeFinish bool) {
+func (aspf *AStarPathfinder) analyzeNeighbors(curCell *Cell, openlist *[]*Cell, closedlist *[]*Cell, costMap *[][]int, targetX, targetY int) {
 	cost := 0
 	cx, cy := curCell.X, curCell.Y
 	for i := -1; i <= 1; i++ {
 		for j := -1; j <= 1; j++ {
-			if (i == 0 && j == 0) || (!diagAllowed && i != 0 && j != 0) {
+			if (i == 0 && j == 0) || (!aspf.DiagonalMoveAllowed && i != 0 && j != 0) {
 				continue
 			}
 			x, y := cx+i, cy+j
 			if areCoordsValidForCostMap(x, y, costMap) {
 				// if (x != targetX || y != targetY) &&
-				if (*costMap)[x][y] == -1 || getCellWithCoordsFromList(closedlist, x, y) != nil { // Cell is impassable or is in closed list
-					if !(forceIncludeFinish && x == targetX && y == targetY) { // if forceIncludeFinish is true, then we won't ignore finish cell whether it is passable or whatever.
+				if (*costMap)[x][y] < 0 || getCellWithCoordsFromList(closedlist, x, y) != nil { // Cell is impassable or is in closed list
+					if !(aspf.ForceIncludeFinish && x == targetX && y == targetY) { // if ForceIncludeFinish is true, then we won't ignore finish cell whether it is passable or whatever.
 						continue // ignore it
 					}
 				}
 				// TODO: add actual "cost to move there" from costMap
 				if (i * j) != 0 { // the Cell under consideration is lying diagonally
-					cost = DIAGONAL_COST
+					cost = DIAGONAL_COST * (*costMap)[x][y]
 				} else {
-					cost = STRAIGHT_COST
+					cost = STRAIGHT_COST * (*costMap)[x][y]
 				}
 				curNeighbor := getCellWithCoordsFromList(openlist, x, y)
 				if curNeighbor != nil {
@@ -156,36 +108,17 @@ func analyzeNeighbors(curCell *Cell, openlist *[]*Cell, closedlist *[]*Cell, cos
 						curNeighbor.setG(cost)
 					}
 				} else {
-					curNeighbor = &Cell{X: x, Y: y, parent: curCell, h: heuristicCost(x, y, targetX, targetY, diagAllowed)}
+					curNeighbor = &Cell{X: x, Y: y, parent: curCell, h: heuristicCost(x, y, targetX, targetY, aspf.DiagonalMoveAllowed)}
+					if x == aspf.toX && y == aspf.toY {
+						aspf.targetCell = curNeighbor
+						return 
+					}
 					curNeighbor.setG(cost)
 					*openlist = append(*openlist, curNeighbor)
 				}
 			}
 		}
 	}
-}
-
-func getCellWithCoordsFromList(list *[]*Cell, x, y int) *Cell {
-	for _, c := range *list {
-		if c.X == x && c.Y == y {
-			return c
-		}
-	}
-	return nil
-}
-
-func getCellWithLowestHeuristicFromList(list *[]*Cell) *Cell {
-	lowest := (*list)[0]
-	for _, c := range *list {
-		if c.h < lowest.h {
-			lowest = c
-		}
-	}
-	return lowest
-}
-
-func areCoordsValidForCostMap(x, y int, costMap *[][]int) bool {
-	return x >= 0 && y >= 0 && (x < len(*costMap)) && (y < len((*costMap)[0]))
 }
 
 // АЛГОРИТМ А*:
