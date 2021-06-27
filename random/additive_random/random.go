@@ -125,6 +125,21 @@ func (rnd *FibRandom) RandomPercent() int {
 	return rnd.Rand(100)
 }
 
+func (rnd *FibRandom) SelectRandomIndexFromWeighted(totalIndices int, getWeight func(int) int) int {
+	totalWeights := 0
+	for i := 0; i < totalIndices; i++ {
+		totalWeights += getWeight(i)
+	}
+	rand := rnd.Rand(totalWeights)
+	for i := 0; i < totalIndices; i++ {
+		if rand < getWeight(i) {
+			return i
+		}
+		rand -= getWeight(i)
+	}
+	panic("SelectRandomIndexFromWeighted panicked!!11")
+}
+
 func (rnd *FibRandom) RandomCoordsInRangeFrom(x, y, r int) (int, int) {
 	rx, ry := x+3*r, y+3*r
 	for (rx-x)*(rx-x)+(ry-y)*(ry-y) > r*r {
