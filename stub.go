@@ -13,6 +13,8 @@ import (
 	"github.com/sidav/golibrl/procedural_generation/Fractal_landscape"
 	"github.com/sidav/golibrl/procedural_generation/RBR_generator"
 	"github.com/sidav/golibrl/procedural_generation/dungeon_generator"
+	"github.com/sidav/golibrl/ai_helpers"
+	"github.com/sidav/golibrl/random/additive_random"
 	"strconv"
 	"strings"
 	"time"
@@ -23,8 +25,9 @@ func main() {
 	defer console.Close_console()
 	key := ""
 	console.Clear_console()
+	testMethods()
 	for key != "ESCAPE" {
-		testgen()
+		// testgen()
 		// testBSP()
 		// testRBR()
 		// angletest()
@@ -33,6 +36,34 @@ func main() {
 		// testFOV()
 		console.Flush_console()
 		key = console.ReadKey()
+	}
+}
+
+func testMethods() {
+	rnd := additive_random.FibRandom{}
+	rnd.InitDefault()
+	DIST := 500
+	CYCLES := 1000
+	for currGenDist := 0; currGenDist < DIST; currGenDist += 2 {
+		start := time.Now()
+		for i := 0; i < CYCLES; i++ {
+			tx := rnd.RandInRange(-currGenDist, currGenDist)
+			ty := rnd.RandInRange(-currGenDist, currGenDist)
+			x, y, _ := ai_helpers.FindCoordsByConditionAndClosestFrom(func(x, y int) bool { return x == tx && y == ty }, 0, 0, DIST)
+			console.PutString(fmt.Sprintf("%v, %v     ", x, y), 0, currGenDist)
+		}
+		console.PutString(fmt.Sprintf("%d opt: %v", currGenDist, time.Since(start)), 20, currGenDist)
+		console.Flush_console()
+
+		start = time.Now()
+		for i := 0; i < CYCLES; i++ {
+			tx := rnd.RandInRange(-currGenDist, currGenDist)
+			ty := rnd.RandInRange(-currGenDist, currGenDist)
+			x, y, _ := ai_helpers.FindCoordsByConditionAndClosestFrom2(func(x, y int) bool { return x == tx && y == ty }, 0, 0, DIST)
+			console.PutString(fmt.Sprintf("%v, %v     ", x, y), 0, currGenDist+1)
+		}
+		console.PutString(fmt.Sprintf("%d nai: %v", currGenDist, time.Since(start)), 20, currGenDist+1)
+		console.Flush_console()
 	}
 }
 
