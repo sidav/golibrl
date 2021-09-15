@@ -5,6 +5,7 @@ type Cell struct {
 	g, h            int
 	parent          *Cell
 	Child           *Cell
+	numChilds 		int
 }
 
 func (c *Cell) getF() int {
@@ -43,10 +44,16 @@ func (c *Cell) GetNextStepVector() (int, int) {
 func (c *Cell) setChildsForPath() {
 	// path := make([]*Cell, 0)
 	curcell := c
+	c.numChilds = 0
 	for curcell.parent != nil {
 		// path = append(path, curcell)
 		curcell.parent.Child = curcell
+		curcell.parent.numChilds = curcell.numChilds+1
 		curcell = curcell.parent
 	}
 	return
+}
+
+func (c *Cell) GetTotalPathLength() int {
+	return c.numChilds
 }
